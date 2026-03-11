@@ -13,8 +13,6 @@ AnimeFlix is a premium, Netflix-inspired Anime discovery web application. It all
 
 ## 📸 Screenshots
 
-*(Add your screenshots here by replacing the placeholders)*
-
 ### Home Page
 ![Home Page Screenshot v1](./public/homescreenshot.jpeg)
 ![Home Page Screenshot v1.2](./public/homescreenshotv1.2.jpeg)
