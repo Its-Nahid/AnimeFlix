@@ -2,6 +2,8 @@
 
 AnimeFlix is a premium, Netflix-inspired Anime discovery web application. It allows users to browse trending, top, and upcoming anime, as well as search for their favorite titles using the Jikan (MyAnimeList) API.
 
+**🌐 Live Demo:** [https://anime-flix-sage.vercel.app/](https://anime-flix-sage.vercel.app/)
+
 ## 🚀 Features
 
 *   **Sleek User Interface**: A modern, dark-themed UI with glassmorphism touches and smooth CSS micro-animations.
