@@ -16,11 +16,12 @@ AnimeFlix is a premium, Netflix-inspired Anime discovery web application. It all
 *(Add your screenshots here by replacing the placeholders)*
 
 ### Home Page
-![Home Page Screenshot](./public/home-screenshot.png)
+![Home Page Screenshot v1](./public/homescreenshot.jpeg)
+![Home Page Screenshot v1.2](./public/homescreenshotv1.2.jpeg)
 > **Description**: The Home page features a massive Hero section highlighting a featured anime ("Attack on Titan"). Below it, you can browse through dynamically loaded rows like "Top Anime", "Trending Now", and "Upcoming". Each anime card has a slick hover effect that reveals the title in an overlay.
 
 ### Search Results Page
-![Search Page Screenshot](./public/search-screenshot.png)
+![Search Page Screenshot](./public/searchscreenshotv1.jpeg)
 > **Description**: Searching for an anime in the top navigation bar routes you to this page, where the Jikan API is queried for the search term, displaying up to 20 relevant results in a wrapped grid format.
 
 ---
