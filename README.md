@@ -1,11 +1,11 @@
 # 🎬 AnimeFlix — Netflix-Inspired Anime Discovery Web App
 
-[![Platform](https://img.shields.io/badge/Platform-Web-blue)]()
-[![Frontend](https://img.shields.io/badge/Frontend-React%20%7C%20Vite-yellow)]()
-[![API](https://img.shields.io/badge/API-Jikan-brightgreen)]()
+[![Platform](https://img.shields.io/badge/Platform-Web-blue)](https://anime-flix-sage.vercel.app/)
+[![Frontend](https://img.shields.io/badge/Frontend-React%20%7C%20Vite-yellow)](https://react.dev/)
+[![API](https://img.shields.io/badge/API-Jikan-brightgreen)](https://jikan.moe/)
 [![Status](https://img.shields.io/badge/Status-Active-success)]()
 
-**AnimeFlix** is a premium web application inspired by Netflix, designed for anime enthusiasts.  
+**AnimeFlix** is a web application inspired by Netflix, designed for anime enthusiasts.  
 Users can browse trending, top, and upcoming anime, search for favorites, and explore detailed anime information using the **Jikan API** (MyAnimeList).
 
 **🌐 Live Demo:** [https://anime-flix-sage.vercel.app/](https://anime-flix-sage.vercel.app/)
@@ -68,30 +68,47 @@ Users can browse trending, top, and upcoming anime, search for favorites, and ex
 
 ## 🛠️ Setup & Installation
 
-To run locally:
-
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/animeflix.git
+git clone https://github.com/Its-Nahid/animeflix.git
 cd animeflix
+```
+
+2. **Install dependencies:**
+
+```bash
+npm install
+```
+
+3. **Start the development server:**
+
+```bash
+npm run dev
+```
+
+4. Open your browser at `http://localhost:5173` (or the port provided by Vite).
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Layer       | Technology                                                   |
-|------------|---------------------------------------------------------------|
-| Frontend   | React, Vite, HTML5, CSS3, JavaScript (ES6+)                 |
-| API        | Jikan API (MyAnimeList)                                      |
-| Routing    | react-router-dom                                              |
-| Networking | Axios                                                         |
-| Styling    | CSS3, Glassmorphism, Transitions                              |
+| Layer      | Technology                                  |
+| ---------- | ------------------------------------------- |
+| Frontend   | React, Vite, HTML5, CSS3, JavaScript (ES6+) |
+| API        | Jikan API (MyAnimeList)                     |
+| Routing    | react-router-dom                            |
+| Networking | Axios                                       |
+| Styling    | CSS3, Glassmorphism, Transitions            |
 
 ---
 
-## 👨‍💻 Author
+## 👨💻 Author
 
 **Nahid**  
 GitHub: [https://github.com/Its-Nahid](https://github.com/Its-Nahid)
 
 ⭐ If you find this project useful, consider **starring the repository** to support further development.
+
+---
+
+*Built with React, Vite, CSS, and ❤️*
