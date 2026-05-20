@@ -52,8 +52,10 @@ function Search() {
 
                 const response = await axios.get(url);
                 if (isMounted) {
-                    const list = response.data?.success ? response.data.data : response.data;
-                    setResults(Array.isArray(list) ? list : []);
+                    const payload = response.data?.success ? response.data.data : response.data;
+                    // API wraps results in { results: [...] }
+                    const list = Array.isArray(payload) ? payload : (payload?.results || []);
+                    setResults(list);
                 }
             } catch (err) {
                 console.error("Error fetching search results:", err);

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import SearchBar from "./SearchBar";
 
 function Navbar() {
-    const [query, setQuery] = useState("");
     const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
 
@@ -21,14 +21,6 @@ function Navbar() {
             window.removeEventListener("scroll", handleScroll);
         };
     }, []);
-    
-    const handleSearch = (e) => {
-        e.preventDefault();
-        if (query.trim() !== "") {
-            navigate(`/search?query=${encodeURIComponent(query.trim())}`);
-            setQuery("");
-        }
-    };
 
     const handleNavClick = (sectionId) => {
         navigate("/");
@@ -57,15 +49,7 @@ function Navbar() {
             </div>
             
             <div className="nav-right">
-                <form className="search-container" onSubmit={handleSearch}>
-                    <input 
-                        type="text" 
-                        placeholder="Titles, genres, years..." 
-                        value={query} 
-                        onChange={(e) => setQuery(e.target.value)} 
-                    />
-                    <button type="submit">🔎</button>
-                </form>
+                <SearchBar />
             </div>
         </nav>
     );

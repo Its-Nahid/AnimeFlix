@@ -15,3 +15,19 @@ export const ENDPOINTS = {
   watch: (id, ep, server = 'auto', sourceType = 'sub') => 
     `${API_BASE_URL}/api/anime/${id}/watch/${ep}?server=${server}&source_type=${sourceType}`,
 };
+
+/**
+ * Returns a proxied image URL for episode thumbnails.
+ * Episode img paths like "/img/ep/..." are blocked by Cloudflare when fetched directly
+ * from animetsu.cc. This routes them through our local proxy server instead.
+ * @param {string} imgPath - Relative path (e.g. /img/ep/...) or absolute URL
+ * @param {string} fallback - Fallback image URL if imgPath is empty
+ */
+export function proxyImage(imgPath, fallback = '') {
+  if (!imgPath) return fallback;
+  // Already a full external URL that's not animetsu → use as-is
+  if (imgPath.startsWith('http') && !imgPath.includes('animetsu')) return imgPath;
+  // Relative path or animetsu URL → route through local image proxy
+  const path = imgPath.startsWith('/') ? imgPath : `/${imgPath}`;
+  return `${API_BASE_URL}/api/proxy/image?path=${encodeURIComponent(path)}`;
+}
