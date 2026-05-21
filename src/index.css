@@ -1283,3 +1283,130 @@ h1, h2, h3, h4 {
     width: 100%;
   }
 }
+/* New AnimeCard Design */
+.new-card-design {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 170px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.new-card-design:hover {
+  transform: translateY(-5px);
+}
+.new-card-design:hover .anime-card-img {
+  transform: scale(1.05);
+}
+.anime-card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.anime-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.card-top-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-divider {
+  color: rgba(255,255,255,0.3);
+}
+.rating-val {
+  color: #fff;
+}
+.rating-pg {
+  color: #a3a3a3;
+}
+.card-bottom-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0) 100%);
+  padding: 20px 10px 10px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: #fff;
+  font-weight: 500;
+}
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.stat-divider {
+  color: rgba(255,255,255,0.4);
+}
+.anime-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.new-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.title-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #666;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.new-card-meta {
+  font-size: 0.8rem;
+  color: #a3a3a3;
+  margin-left: 12px;
+}
+.row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.row-header h2 {
+  margin-bottom: 0 !important;
+}
+.view-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #a3a3a3;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.view-more-btn:hover {
+  color: #fff;
+}

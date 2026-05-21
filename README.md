@@ -80,25 +80,35 @@ cd animeflix
 npm install
 ```
 
-3. **Start the development server:**
+3. **Start the API proxy server** (required for streaming & data):
+
+```bash
+node proxy.cjs
+```
+> The API proxy runs on `http://localhost:8080` by default. You can change the port with `PORT=<port> node proxy.cjs`.
+
+4. **Start the frontend dev server** (in a separate terminal):
 
 ```bash
 npm run dev
 ```
 
-4. Open your browser at `http://localhost:5173` (or the port provided by Vite).
+5. Open your browser at `http://localhost:5173` (or the port provided by Vite).
+
+> **Note:** Both the API proxy (`proxy.cjs`) and the Vite dev server (`npm run dev`) must be running simultaneously for the app to function properly.
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Layer      | Technology                                  |
-| ---------- | ------------------------------------------- |
-| Frontend   | React, Vite, HTML5, CSS3, JavaScript (ES6+) |
-| API        | Jikan API (MyAnimeList)                     |
-| Routing    | react-router-dom                            |
-| Networking | Axios                                       |
-| Styling    | CSS3, Glassmorphism, Transitions            |
+| Layer      | Technology                                        |
+| ---------- | ------------------------------------------------- |
+| Frontend   | React, Vite, HTML5, CSS3, JavaScript (ES6+)       |
+| Backend    | Node.js proxy server (`proxy.cjs`) on port 8080   |
+| Streaming  | HLS.js, AES-128-CBC decryption, HLS playlist rewriting |
+| Routing    | react-router-dom                                  |
+| Networking | Axios                                             |
+| Styling    | CSS3, Glassmorphism, Transitions                  |
 
 ---
 

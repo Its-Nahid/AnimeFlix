@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import AnimeCard from "./AnimeCard";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
-function AnimeRow({ title, url }) {
+function AnimeRow({ title, url, limit = 0, viewMoreLink = "/search" }) {
     const [animeList, setAnimeList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -17,7 +18,7 @@ function AnimeRow({ title, url }) {
                 if (isMounted) {
                     // Animetsu-api wraps responses in standard models.Envelope { success, data }
                     const list = response.data?.success ? response.data.data : response.data;
-                    setAnimeList(Array.isArray(list) ? list : []);
+                    setAnimeList(Array.isArray(list) ? list : (list?.results || []));
                 }
             } catch (err) {
                 console.error("Error fetching anime in row:", err);
@@ -37,12 +38,14 @@ function AnimeRow({ title, url }) {
     if (loading) {
         return (
             <div className="anime-row">
-                <h2>{title}</h2>
+                <div className="row-header">
+                    <h2>{title}</h2>
+                </div>
                 <div className="row-cards" style={{ overflow: "hidden" }}>
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                         <div key={n} className="shimmer-card" style={{
-                            minWidth: "150px",
-                            height: "225px",
+                            minWidth: "170px",
+                            height: "250px",
                             borderRadius: "8px",
                             background: "linear-gradient(90deg, #222 25%, #333 50%, #222 75%)",
                             backgroundSize: "200% 100%",
@@ -59,11 +62,21 @@ function AnimeRow({ title, url }) {
         return null; // Gracefully hide rows that fail or are empty
     }
 
+    const displayList = limit > 0 ? animeList.slice(0, limit) : animeList;
+
     return (
         <div className="anime-row">
-            <h2>{title}</h2>
+            <div className="row-header">
+                <h2>{title}</h2>
+                {limit > 0 && animeList.length > limit && (
+                    <Link to={viewMoreLink} className="view-more-btn">
+                        View More 
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </Link>
+                )}
+            </div>
             <div className="row-cards">
-                {animeList.map((anime) => (
+                {displayList.map((anime) => (
                     <AnimeCard key={anime.id || anime.mal_id} anime={anime} />
                 ))}
             </div>

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import AnimeDetail from "./pages/AnimeDetails";
 import Search from "./pages/Search";
+import Recent from "./pages/Recent";
 import WatchPage from "./pages/WatchPage";
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         <Route path="/anime/:id" element={<AnimeDetail />} />
         <Route path="/anime/:id/watch/:ep" element={<WatchPage />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/recent" element={<Recent />} />
       </Routes>
     </BrowserRouter>
   );

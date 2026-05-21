@@ -46,8 +46,8 @@ function Home() {
             <Hero anime={featured} onWatchClick={handleWatchClick} />
             {/* Standard overlapping Netflix spacing with a negative top margin for rows */}
             <div className="rows-container" style={{ position: "relative", zIndex: 10, marginTop: "-60px" }}>
-                <div id="row-trending">
-                    <AnimeRow title="Trending Now" url={ENDPOINTS.trending} />
+                <div id="row-recent">
+                    <AnimeRow title="Latest Episodes" url={ENDPOINTS.recent} limit={8} viewMoreLink="/recent" />
                 </div>
                 <div id="row-season">
                     <AnimeRow title="Seasonal Highlights" url={ENDPOINTS.season} />
