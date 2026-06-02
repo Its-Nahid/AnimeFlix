@@ -2,7 +2,7 @@
 .layout-with-sidebar {
   display: flex;
   min-height: 100vh;
-  background-color: #0b0b0e;
+  background-color: #141414;
   color: #fff;
   font-family: 'Inter', sans-serif;
 }
@@ -37,7 +37,7 @@
 }
 
 .sidebar-icon:hover, .sidebar-icon.active {
-  color: #ff9800; /* or primary red depending on theme */
+  color: var(--primary-red);
 }
 
 .main-content {
@@ -106,7 +106,7 @@
   left: 0;
   width: 100%;
   height: 80vh;
-  background: linear-gradient(to bottom, transparent, #0b0b0e);
+  background: linear-gradient(to bottom, transparent, #141414);
   z-index: 1;
 }
 
@@ -206,8 +206,8 @@
 }
 
 .next-ep-countdown {
-  background-color: rgba(255, 152, 0, 0.1);
-  color: #ff9800;
+  background-color: rgba(229, 9, 20, 0.1);
+  color: var(--primary-red);
   padding: 12px;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -242,8 +242,8 @@
 }
 
 .rating-star {
-  color: #ff9800;
-  background: rgba(255, 152, 0, 0.1);
+  color: var(--primary-red);
+  background: rgba(229, 9, 20, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -257,7 +257,7 @@
 }
 
 .read-more {
-  color: #ff9800;
+  color: var(--primary-red);
   font-size: 0.85rem;
   cursor: pointer;
   display: inline-block;
@@ -563,8 +563,8 @@
 }
 
 .audio-btn.active {
-  background: #ff9800;
-  color: #000;
+  background: var(--primary-red);
+  color: #fff;
   font-weight: 600;
 }
 
@@ -594,8 +594,8 @@
 }
 
 .server-btn.active {
-  border-color: #ff9800;
-  color: #ff9800;
+  border-color: var(--primary-red);
+  color: var(--primary-red);
 }
 
 .server-btn .ping {
@@ -606,7 +606,7 @@
 }
 
 .server-btn.active .ping {
-  color: #ff9800;
+  color: var(--primary-red);
 }
 
 .ep-desc {
@@ -668,7 +668,7 @@
 
 .watch-ep-card.active {
   background: rgba(255,255,255,0.1);
-  border-left: 3px solid #ff9800;
+  border-left: 3px solid var(--primary-red);
 }
 
 .ep-number-list {
@@ -679,7 +679,7 @@
 }
 
 .watch-ep-card.active .ep-number-list {
-  color: #ff9800;
+  color: var(--primary-red);
 }
 
 .ep-thumb-small {
@@ -791,20 +791,20 @@
 }
 
 .main-title-new {
-  font-size: 2rem;
-  font-family: 'Inter', monospace, sans-serif;
-  font-weight: 500;
+  font-size: 2.2rem;
+  font-family: var(--font-display);
+  font-weight: 700;
   margin-bottom: 5px;
   color: #fff;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.02em;
 }
 
 .native-title-new {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #999;
   font-weight: 400;
   margin-bottom: 15px;
-  font-family: monospace;
+  font-family: var(--font-body);
 }
 
 .title-meta-new {
@@ -820,7 +820,8 @@
 .meta-tag {
   font-size: 0.8rem;
   color: #ccc;
-  font-family: monospace;
+  font-family: var(--font-body);
+  font-weight: 500;
 }
 
 .meta-tag.format {
@@ -841,7 +842,7 @@
   font-size: 0.85rem;
   color: #999;
   margin-bottom: 15px;
-  font-family: monospace;
+  font-family: var(--font-body);
 }
 
 .next-ep-inline {
@@ -852,7 +853,7 @@
   font-size: 0.85rem;
   line-height: 1.6;
   color: #888;
-  font-family: monospace;
+  font-family: var(--font-body);
   max-width: 900px;
 }
 
@@ -872,8 +873,8 @@
 .view-more-btn {
   background: transparent;
   border: none;
-  color: #ff9800;
-  font-family: monospace;
+  color: var(--primary-red);
+  font-family: var(--font-body);
   cursor: pointer;
   padding: 0;
   margin-top: 8px;
@@ -909,7 +910,7 @@
 
 .char-name {
   font-size: 0.85rem;
-  font-family: monospace;
+  font-family: var(--font-body);
   color: #ccc;
   margin-bottom: 4px;
 }
@@ -941,7 +942,7 @@
   padding-bottom: 10px;
   cursor: pointer;
   position: relative;
-  font-family: monospace;
+  font-family: var(--font-body);
 }
 
 .tabs-header-new button.active {
@@ -955,7 +956,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #ff9800;
+  background-color: var(--primary-red);
 }
 
 .episodes-tab-new {
@@ -1022,9 +1023,9 @@
 }
 
 .search-modal-go {
-  background: #ff9800;
+  background: var(--primary-red);
   border: none;
-  color: #000;
+  color: #fff;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 6px;
@@ -1034,14 +1035,14 @@
 }
 
 .search-modal-go:hover {
-  background: #ffa726;
+  background: var(--hover-red);
 }
 
 .search-modal-hint {
   padding: 10px 20px;
   font-size: 0.75rem;
   color: #555;
-  font-family: monospace;
+  font-family: var(--font-body);
 }
 
 .search-modal-hint kbd {
@@ -1056,7 +1057,7 @@
 /* layout without sidebar (for AnimeDetails and WatchPage) */
 .layout-without-sidebar {
   min-height: 100vh;
-  background-color: #0b0b0e;
+  background-color: #141414;
   color: #fff;
   font-family: 'Inter', sans-serif;
   position: relative;

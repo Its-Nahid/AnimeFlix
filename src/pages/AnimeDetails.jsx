@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { ENDPOINTS, proxyImage } from "../config";
+import { ENDPOINTS, proxyImage, fetchZenshinEpisodes } from "../config";
 
 function AnimeDetail() {
   const { id } = useParams();
@@ -32,7 +32,28 @@ function AnimeDetail() {
 
         if (isMounted) {
           setAnime(infoData);
-          setEpisodes(Array.isArray(epsData) ? epsData.sort((a, b) => a.ep_num - b.ep_num) : []);
+          const sortedEps = Array.isArray(epsData) ? epsData.sort((a, b) => a.ep_num - b.ep_num) : [];
+          setEpisodes(sortedEps);
+
+          // Fetch zenshin-API episodes in parallel to enrich episode name & thumbnail
+          if (infoData?.mal_id && sortedEps.length > 0) {
+            fetchZenshinEpisodes(infoData.mal_id).then((zenshinEps) => {
+              if (isMounted && Object.keys(zenshinEps).length > 0) {
+                const enriched = sortedEps.map((ep) => {
+                  const zEp = zenshinEps[String(ep.ep_num)];
+                  if (zEp) {
+                    return {
+                      ...ep,
+                      name: zEp.title?.en || zEp.nameTvdb || ep.name,
+                      img: zEp.image || ep.img,
+                    };
+                  }
+                  return ep;
+                });
+                setEpisodes(enriched);
+              }
+            }).catch(e => console.error("Zenshin enrichment failed:", e));
+          }
         }
       } catch (err) {
         console.error("Error loading anime details:", err);
@@ -183,7 +204,11 @@ function AnimeDetail() {
                     <div className="ep-thumb">
                       <img 
                         src={proxyImage(ep.img, banner)} 
-                        alt={ep.name} 
+                        alt={ep.name || `Episode ${ep.ep_num}`} 
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = banner;
+                        }}
                       />
                       <div className="ep-badge">EP {ep.ep_num}</div>
                     </div>

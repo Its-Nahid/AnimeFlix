@@ -27,16 +27,27 @@ const SORTS = [
 ];
 
 function Search() {
-    const queryParam = useQuery().get("query") || "";
+    const query = useQuery();
+    const queryParam = query.get("query") || query.get("q") || "";
+    const sortParam = query.get("sort") || "POPULARITY_DESC";
+    const genreParam = query.get("genres") || "";
+    const formatParam = query.get("format") || "";
 
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     // Dynamic Filter states
-    const [selectedGenre, setSelectedGenre] = useState("");
-    const [selectedFormat, setSelectedFormat] = useState("");
-    const [selectedSort, setSelectedSort] = useState("POPULARITY_DESC");
+    const [selectedGenre, setSelectedGenre] = useState(genreParam);
+    const [selectedFormat, setSelectedFormat] = useState(formatParam);
+    const [selectedSort, setSelectedSort] = useState(sortParam);
+
+    // Sync route updates to states
+    useEffect(() => {
+        setSelectedGenre(genreParam);
+        setSelectedFormat(formatParam);
+        setSelectedSort(sortParam);
+    }, [genreParam, formatParam, sortParam]);
 
     useEffect(() => {
         let isMounted = true;
@@ -44,16 +55,28 @@ function Search() {
             setLoading(true);
             setError(null);
             try {
-                // Build dynamic query parameters for animetsu-api search
-                let url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(queryParam)}`;
-                if (selectedGenre) url += `&genres=${selectedGenre}`;
-                if (selectedFormat) url += `&format=${selectedFormat}`;
-                if (selectedSort) url += `&sort=${selectedSort}`;
+                let url;
+                if (!queryParam && !selectedGenre && !selectedFormat) {
+                    // Direct explore lists browsing for Gen Z high-performance routing
+                    if (selectedSort === "SCORE_DESC") {
+                        url = `${API_BASE_URL}/api/top-rated`;
+                    } else if (selectedSort === "SEASON_YEAR_DESC" || selectedSort === "TRENDING_DESC") {
+                        url = `${API_BASE_URL}/api/season`;
+                    } else if (selectedSort === "POPULARITY_DESC") {
+                        url = `${API_BASE_URL}/api/popular`;
+                    } else {
+                        url = `${API_BASE_URL}/api/trending`;
+                    }
+                } else {
+                    url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(queryParam)}`;
+                    if (selectedGenre) url += `&genres=${selectedGenre}`;
+                    if (selectedFormat) url += `&format=${selectedFormat}`;
+                    if (selectedSort) url += `&sort=${selectedSort}`;
+                }
 
                 const response = await axios.get(url);
                 if (isMounted) {
                     const payload = response.data?.success ? response.data.data : response.data;
-                    // API wraps results in { results: [...] }
                     const list = Array.isArray(payload) ? payload : (payload?.results || []);
                     setResults(list);
                 }
@@ -78,7 +101,16 @@ function Search() {
             <Navbar />
             <div className="search-content">
                 <div className="search-header">
-                    <h2>Search results for <span className="highlight">"{queryParam}"</span></h2>
+                    {queryParam ? (
+                        <h2>Search results for <span className="highlight">"{queryParam}"</span></h2>
+                    ) : (
+                        <h2>Discover <span className="highlight">
+                            {selectedSort === "SCORE_DESC" ? "Top Rated Anime" :
+                             selectedSort === "SEASON_YEAR_DESC" ? "Seasonal Highlights" :
+                             selectedSort === "TRENDING_DESC" ? "Trending Highlights" :
+                             selectedSort === "POPULARITY_DESC" ? "All-Time Popular Anime" : "Anime Archives"}
+                        </span></h2>
+                    )}
                     
                     {/* Advanced filter control bar */}
                     <div className="filters-bar">

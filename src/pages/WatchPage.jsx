@@ -4,7 +4,7 @@ import Hls from "hls.js";
 import axios from "axios";
 import AnimeCard from "../components/AnimeCard";
 import Navbar from "../components/Navbar";
-import { API_BASE_URL, ENDPOINTS, proxyImage } from "../config";
+import { API_BASE_URL, ENDPOINTS, proxyImage, fetchZenshinEpisodes } from "../config";
 
 function WatchPage() {
   const { id, ep } = useParams();
@@ -23,6 +23,8 @@ function WatchPage() {
   const [sourceType, setSourceType] = useState("sub");
   const [selectedQuality, setSelectedQuality] = useState("");
   const [selectedServer, setSelectedServer] = useState("auto");
+  const [hasDub, setHasDub] = useState(false);
+  const [checkingDub, setCheckingDub] = useState(true);
   const watchDataRef = useRef(null);
 
   useEffect(() => {
@@ -41,7 +43,48 @@ function WatchPage() {
 
         if (isMounted) {
           setAnime(infoData);
-          setEpisodes(Array.isArray(epsData) ? epsData.sort((a, b) => a.ep_num - b.ep_num) : []);
+          const sortedEps = Array.isArray(epsData) ? epsData.sort((a, b) => a.ep_num - b.ep_num) : [];
+          setEpisodes(sortedEps);
+
+          // Fetch zenshin-API episodes in parallel to enrich episode name & thumbnail
+          if (infoData?.mal_id && sortedEps.length > 0) {
+            fetchZenshinEpisodes(infoData.mal_id).then((zenshinEps) => {
+              if (isMounted && Object.keys(zenshinEps).length > 0) {
+                const enriched = sortedEps.map((ep) => {
+                  const zEp = zenshinEps[String(ep.ep_num)];
+                  if (zEp) {
+                    return {
+                      ...ep,
+                      name: zEp.title?.en || zEp.nameTvdb || ep.name,
+                      img: zEp.image || ep.img,
+                    };
+                  }
+                  return ep;
+                });
+                setEpisodes(enriched);
+              }
+            }).catch(e => console.error("Zenshin enrichment failed:", e));
+          }
+
+          // Background check for DUB availability on the first episode
+          if (sortedEps.length > 0) {
+            setCheckingDub(true);
+            const firstEpNum = sortedEps[0].ep_num;
+            const checkUrl = `${API_BASE_URL}/api/anime/${id}/watch/${firstEpNum}?server=auto&source_type=dub`;
+            axios.get(checkUrl).then((checkRes) => {
+              const checkData = checkRes.data?.success ? checkRes.data.data : checkRes.data;
+              if (isMounted) {
+                setHasDub(!!(checkData?.sources && checkData.sources.length > 0));
+              }
+            }).catch(() => {
+              if (isMounted) setHasDub(false);
+            }).finally(() => {
+              if (isMounted) setCheckingDub(false);
+            });
+          } else {
+            setCheckingDub(false);
+            setHasDub(false);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -136,7 +179,7 @@ function WatchPage() {
 
   if (loading || !anime) {
     return (
-      <div className="watch-page-wrapper" style={{ minHeight: "100vh", backgroundColor: "#0b0b0e" }}>
+      <div className="watch-page-wrapper" style={{ minHeight: "100vh", backgroundColor: "#141414" }}>
         <Navbar />
         <div className="layout-with-sidebar" style={{ paddingTop: "80px" }}>
           <div className="main-content loading-screen">
@@ -151,7 +194,7 @@ function WatchPage() {
   const animeTitle = anime.title?.english || anime.title?.romaji;
 
   return (
-    <div className="watch-page-wrapper" style={{ minHeight: "100vh", backgroundColor: "#0b0b0e" }}>
+    <div className="watch-page-wrapper" style={{ minHeight: "100vh", backgroundColor: "#141414" }}>
       <Navbar />
       <div className="layout-with-sidebar watch-page" style={{ paddingTop: "80px" }}>
         <div className="main-content watch-layout">
@@ -201,9 +244,11 @@ function WatchPage() {
                 <button className={`audio-btn ${sourceType === "sub" ? "active" : ""}`} onClick={() => setSourceType("sub")}>
                   文A SUB
                 </button>
-                <button className={`audio-btn ${sourceType === "dub" ? "active" : ""}`} onClick={() => setSourceType("dub")}>
-                  🎤 DUB
-                </button>
+                {!checkingDub && hasDub && (
+                  <button className={`audio-btn ${sourceType === "dub" ? "active" : ""}`} onClick={() => setSourceType("dub")}>
+                    🎤 DUB
+                  </button>
+                )}
               </div>
 
               <div className="servers-list">

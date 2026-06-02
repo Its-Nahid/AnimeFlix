@@ -31,3 +31,34 @@ export function proxyImage(imgPath, fallback = '') {
   const path = imgPath.startsWith('/') ? imgPath : `/${imgPath}`;
   return `${API_BASE_URL}/api/proxy/image?path=${encodeURIComponent(path)}`;
 }
+
+// ─── Zenshin API (episode details & thumbnails) ────────────────────────────
+// https://github.com/hitarth-gg/zenshin-API
+const ZENSHIN_BASE = 'https://zenshin-supabase-api.onrender.com';
+
+// Simple in-memory cache so we don't hammer the free-tier API
+const _zenshinCache = {};
+
+/**
+ * Fetches episode details from the zenshin-API using the MyAnimeList ID.
+ * Returns a map of episode number → episode data, or an empty object on failure.
+ * Each episode contains: title (en), image (TVDB screenshot), overview, airDate, runtime, etc.
+ * @param {number|string} malId - MyAnimeList ID of the anime
+ * @returns {Promise<Object>} episodes map keyed by episode number string
+ */
+export async function fetchZenshinEpisodes(malId) {
+  if (!malId) return {};
+  // Return from cache if available
+  if (_zenshinCache[malId]) return _zenshinCache[malId];
+  try {
+    const res = await fetch(`${ZENSHIN_BASE}/mappings?mal_id=${malId}`);
+    if (!res.ok) return {};
+    const data = await res.json();
+    const episodes = data?.episodes || {};
+    _zenshinCache[malId] = episodes;
+    return episodes;
+  } catch (err) {
+    console.error("Error fetching zenshin episodes:", err);
+    return {};
+  }
+}

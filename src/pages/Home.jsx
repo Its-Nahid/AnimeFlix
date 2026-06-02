@@ -8,20 +8,24 @@ import { ENDPOINTS } from "../config";
 import axios from "axios";
 
 function Home() {
-    const [featured, setFeatured] = useState(null);
+    const [heroSlides, setHeroSlides] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         let isMounted = true;
         async function fetchFeatured() {
             try {
-                // Fetch the trending list to dynamically select the spotlight featured anime
-                const response = await axios.get(ENDPOINTS.trending);
+                // Fetch the seasonal highlights
+                const response = await axios.get(ENDPOINTS.season);
                 if (isMounted) {
-                    const list = response.data?.success ? response.data.data : response.data;
+                    let list = response.data?.success ? response.data.data : response.data;
+                    if (!Array.isArray(list) || list.length === 0) {
+                        // Fallback to trending
+                        const trendingRes = await axios.get(ENDPOINTS.trending);
+                        list = trendingRes.data?.success ? trendingRes.data.data : trendingRes.data;
+                    }
                     if (Array.isArray(list) && list.length > 0) {
-                        // Pick the first trending anime as the hero spotlight
-                        setFeatured(list[0]);
+                        setHeroSlides(list.slice(0, 5));
                     }
                 }
             } catch (err) {
@@ -34,32 +38,32 @@ function Home() {
         };
     }, []);
 
-    const handleWatchClick = () => {
-        if (featured) {
-            navigate(`/anime/${featured.id || featured.mal_id}`);
+    const handleWatchClick = (anime) => {
+        if (anime) {
+            navigate(`/anime/${anime.id || anime.mal_id}`);
         }
     };
 
     return (
         <div className="home-container">
             <Navbar />
-            <Hero anime={featured} onWatchClick={handleWatchClick} />
+            <Hero animeList={heroSlides} onWatchClick={handleWatchClick} />
             {/* Standard overlapping Netflix spacing with a negative top margin for rows */}
             <div className="rows-container" style={{ position: "relative", zIndex: 10, marginTop: "-60px" }}>
                 <div id="row-recent">
-                    <AnimeRow title="Latest Episodes" url={ENDPOINTS.recent} limit={8} viewMoreLink="/recent" />
+                    <AnimeRow title="Latest Episodes" subtitle="Recently updated releases" url={ENDPOINTS.recent} limit={8} viewMoreLink="/recent" />
                 </div>
                 <div id="row-season">
-                    <AnimeRow title="Seasonal Highlights" url={ENDPOINTS.season} />
+                    <AnimeRow title="Seasonal Highlights" subtitle="The best of this season" url={ENDPOINTS.season} limit={8} viewMoreLink="/search?sort=SEASON_YEAR_DESC" />
                 </div>
                 <div id="row-popular">
-                    <AnimeRow title="All-Time Popular" url={ENDPOINTS.popular} />
+                    <AnimeRow title="All-Time Popular" subtitle="Most watched by the community" url={ENDPOINTS.popular} limit={8} viewMoreLink="/search?sort=POPULARITY_DESC" />
                 </div>
                 <div id="row-top">
-                    <AnimeRow title="Top Rated" url={ENDPOINTS.topRated} />
+                    <AnimeRow title="Top Rated" subtitle="Critically acclaimed masterpieces" url={ENDPOINTS.topRated} limit={8} viewMoreLink="/search?sort=SCORE_DESC" />
                 </div>
                 <div id="row-upcoming">
-                    <AnimeRow title="Highly Anticipated Upcoming" url={ENDPOINTS.upcoming} />
+                    <AnimeRow title="Highly Anticipated Upcoming" subtitle="Exciting new shows on the horizon" url={ENDPOINTS.upcoming} limit={8} viewMoreLink="/search?sort=POPULARITY_DESC" />
                 </div>
             </div>
             <Footer />

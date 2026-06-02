@@ -3,7 +3,7 @@ import AnimeCard from "./AnimeCard";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-function AnimeRow({ title, url, limit = 0, viewMoreLink = "/search" }) {
+function AnimeRow({ title, subtitle, url, limit = 0, viewMoreLink = "/search" }) {
     const [animeList, setAnimeList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -38,8 +38,11 @@ function AnimeRow({ title, url, limit = 0, viewMoreLink = "/search" }) {
     if (loading) {
         return (
             <div className="anime-row">
-                <div className="row-header">
-                    <h2>{title}</h2>
+                <div className="row-header-wrapper">
+                    <div className="row-header">
+                        <h2>{title}</h2>
+                    </div>
+                    {subtitle && <p className="row-subtitle">{subtitle}</p>}
                 </div>
                 <div className="row-cards" style={{ overflow: "hidden" }}>
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -66,14 +69,17 @@ function AnimeRow({ title, url, limit = 0, viewMoreLink = "/search" }) {
 
     return (
         <div className="anime-row">
-            <div className="row-header">
-                <h2>{title}</h2>
-                {limit > 0 && animeList.length > limit && (
-                    <Link to={viewMoreLink} className="view-more-btn">
-                        View More 
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                    </Link>
-                )}
+            <div className="row-header-wrapper">
+                <div className="row-header">
+                    <h2>{title}</h2>
+                    {viewMoreLink && (
+                        <Link to={viewMoreLink} className="view-more-btn">
+                            VIEW MORE 
+                            <svg className="view-more-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </Link>
+                    )}
+                </div>
+                {subtitle && <p className="row-subtitle">{subtitle}</p>}
             </div>
             <div className="row-cards">
                 {displayList.map((anime) => (
