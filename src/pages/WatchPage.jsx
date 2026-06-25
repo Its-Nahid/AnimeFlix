@@ -194,18 +194,35 @@ function WatchPage() {
   const animeTitle = anime.title?.english || anime.title?.romaji;
 
   return (
-    <div className="watch-page-wrapper" style={{ minHeight: "100vh", backgroundColor: "#141414" }}>
+    <div className="watch-page-wrapper">
       <Navbar />
-      <div className="layout-with-sidebar watch-page" style={{ paddingTop: "80px" }}>
-        <div className="main-content watch-layout">
+      <div className="watch-3col-layout">
 
-        {/* LEFT COLUMN: PLAYER */}
-        <div className="player-col">
-          <button className="btn-back-details" onClick={() => navigate(`/anime/${id}`)}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Back to details
-          </button>
+        {/* LEFT COLUMN: EPISODES LIST */}
+        <div className="watch-left-sidebar">
+          <div className="ep-sidebar-header">
+            <div className="ep-sidebar-toggles">
+              <button className={`ep-sidebar-type-btn ${sourceType === "sub" ? "active" : ""}`} onClick={() => setSourceType("sub")}>Sub & Dub</button>
+            </div>
+            <span className="ep-sidebar-range">{episodes.length > 0 ? `001-${String(episodes.length).padStart(3, '0')}` : '—'}</span>
+          </div>
+          <div className="ep-sidebar-list">
+            {episodes.map(episode => (
+              <div 
+                key={episode.id} 
+                className={`ep-sidebar-item ${episode.ep_num.toString() === ep ? "active" : ""}`}
+                onClick={() => navigate(`/anime/${id}/watch/${episode.ep_num}`)}
+              >
+                <span className="ep-sidebar-num">{episode.ep_num}</span>
+                <span className="ep-sidebar-name">{episode.name || `Episode ${episode.ep_num}`}</span>
+                {episode.ep_num.toString() === ep && <span className="ep-sidebar-playing">▶</span>}
+              </div>
+            ))}
+          </div>
+        </div>
 
+        {/* CENTER COLUMN: PLAYER + INFO */}
+        <div className="watch-center-col">
           <div className="video-wrapper">
             <div className="server-status-badge">
               <span className="status-dot"></span>
@@ -226,78 +243,95 @@ function WatchPage() {
             )}
           </div>
 
-          <div className="player-meta">
-            <div className="ep-title-row">
-              <div className="ep-titles">
-                <div className="ep-num-label">EP {ep}</div>
-                <h1 className="ep-main-title">{currentEpisode?.name || `Episode ${ep}`}</h1>
-                <h3 className="anime-sub-title">{animeTitle?.toUpperCase()}</h3>
+          {/* Server Controls Row */}
+          <div className="watch-server-row">
+            <div className="watch-server-group">
+              <span className="watch-server-type-label">SUB</span>
+              <div className="watch-server-btns">
+                <button className={`watch-srv-btn ${selectedServer === "auto" ? "active" : ""}`} onClick={() => setSelectedServer("auto")}>⚡ Auto</button>
+                <button className={`watch-srv-btn ${selectedServer === "kite" ? "active" : ""}`} onClick={() => setSelectedServer("kite")}>Kite</button>
+                <button className={`watch-srv-btn ${selectedServer === "dio" ? "active" : ""}`} onClick={() => setSelectedServer("dio")}>Dio</button>
+                <button className={`watch-srv-btn ${selectedServer === "kiss" ? "active" : ""}`} onClick={() => setSelectedServer("kiss")}>Kiss</button>
+                <button className={`watch-srv-btn ${selectedServer === "meg" ? "active" : ""}`} onClick={() => setSelectedServer("meg")}>Meg</button>
+                <button className={`watch-srv-btn ${selectedServer === "pahe" ? "active" : ""}`} onClick={() => setSelectedServer("pahe")}>Pahe</button>
               </div>
-              <button className="btn-download">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Download
-              </button>
             </div>
+            {!checkingDub && hasDub && (
+              <div className="watch-server-group">
+                <span className="watch-server-type-label">DUB</span>
+                <div className="watch-server-btns">
+                  <button className={`watch-srv-btn ${sourceType === "dub" ? "active" : ""}`} onClick={() => setSourceType("dub")}>🎤 DUB</button>
+                </div>
+              </div>
+            )}
+          </div>
 
-            <div className="server-controls">
-              <div className="audio-toggles">
-                <button className={`audio-btn ${sourceType === "sub" ? "active" : ""}`} onClick={() => setSourceType("sub")}>
-                  文A SUB
-                </button>
-                {!checkingDub && hasDub && (
-                  <button className={`audio-btn ${sourceType === "dub" ? "active" : ""}`} onClick={() => setSourceType("dub")}>
-                    🎤 DUB
-                  </button>
+          {/* Episode Info Notice */}
+          <div className="watch-ep-notice">
+            <span>You're watching <strong>Episode {ep}.</strong> If current servers don't work, please try other servers beside.</span>
+          </div>
+
+          {/* Anime Info Section */}
+          <div className="watch-anime-info">
+            <div className="watch-anime-poster">
+              <img src={proxyImage(anime.cover_image?.large || anime.cover_image?.medium)} alt={animeTitle} />
+            </div>
+            <div className="watch-anime-details">
+              <h2 className="watch-anime-title">{animeTitle}</h2>
+              {anime.title?.romaji && anime.title?.english && (
+                <p className="watch-anime-alt-title">{anime.title.romaji}</p>
+              )}
+              <div className="watch-anime-tags">
+                {anime.rating && <span className="watch-tag">{anime.rating}</span>}
+                {anime.quality && <span className="watch-tag">HD</span>}
+                <span className="watch-tag cc-tag">CC</span>
+              </div>
+              <p className="watch-anime-desc" dangerouslySetInnerHTML={{ __html: anime.description }}></p>
+              <div className="watch-anime-meta-grid">
+                <div className="meta-item"><span className="meta-label">Type:</span> <span className="meta-value">{anime.type || 'TV'}</span></div>
+                <div className="meta-item"><span className="meta-label">Episodes:</span> <span className="meta-value">{anime.total_episodes || episodes.length}</span></div>
+                <div className="meta-item"><span className="meta-label">Status:</span> <span className="meta-value">{anime.status || 'Unknown'}</span></div>
+                <div className="meta-item"><span className="meta-label">Duration:</span> <span className="meta-value">{anime.duration || '24 min'}</span></div>
+                {anime.genres && anime.genres.length > 0 && (
+                  <div className="meta-item full-width"><span className="meta-label">Genres:</span> <span className="meta-value">{anime.genres.join(', ')}</span></div>
                 )}
               </div>
-
-              <div className="servers-list">
-                <span className="server-label">Servers</span>
-                <button className={`server-btn ${selectedServer === "auto" ? "active" : ""}`} onClick={() => setSelectedServer("auto")}>⚡ Auto</button>
-                <button className={`server-btn ${selectedServer === "kite" ? "active" : ""}`} onClick={() => setSelectedServer("kite")}>kite <span className="ping">208ms</span></button>
-                <button className={`server-btn ${selectedServer === "dio" ? "active" : ""}`} onClick={() => setSelectedServer("dio")}>dio <span className="ping">211ms</span></button>
-                <button className={`server-btn ${selectedServer === "kiss" ? "active" : ""}`} onClick={() => setSelectedServer("kiss")}>kiss <span className="ping">331ms</span></button>
-                <button className={`server-btn ${selectedServer === "meg" ? "active" : ""}`} onClick={() => setSelectedServer("meg")}>meg <span className="ping">339ms</span></button>
-                <button className={`server-btn ${selectedServer === "pahe" ? "active" : ""}`} onClick={() => setSelectedServer("pahe")}>pahe <span className="ping">350ms</span></button>
-              </div>
             </div>
-
-            <p className="ep-desc" dangerouslySetInnerHTML={{ __html: currentEpisode?.desc || anime.description }}></p>
+            {anime.average_score && (
+              <div className="watch-anime-score">
+                <div className="score-number">{(anime.average_score / 10).toFixed(1)} <span className="score-max">/10</span></div>
+                <div className="score-stars">
+                  {[1,2,3,4,5].map(s => (
+                    <span key={s} className={`star ${s <= Math.round(anime.average_score / 20) ? 'filled' : ''}`}>★</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* RIGHT COLUMN: EPISODES */}
-        <div className="sidebar-right-col">
-          <h3 className="section-title">EPISODES</h3>
-          <div className="watch-episodes-list">
-            {episodes.map(episode => (
-              <div 
-                key={episode.id} 
-                className={`watch-ep-card ${episode.ep_num.toString() === ep ? "active" : ""}`}
-                onClick={() => navigate(`/anime/${id}/watch/${episode.ep_num}`)}
-              >
-                <span className="ep-number-list">{episode.ep_num}</span>
-                <div className="ep-thumb-small">
-                  <img src={proxyImage(episode.img, anime.cover_image?.large)} alt={episode.name} />
+        {/* RIGHT COLUMN: RELATED ANIME */}
+        <div className="watch-right-sidebar">
+          <h3 className="related-title">Related</h3>
+          <div className="related-list">
+            {anime.recommendations?.slice(0, 10).map(rec => (
+              <div key={rec.id} className="related-item" onClick={() => navigate(`/anime/${rec.id}`)}>
+                <div className="related-thumb">
+                  <img src={proxyImage(rec.cover_image?.large || rec.cover_image?.medium)} alt={rec.title?.english || rec.title?.romaji} />
                 </div>
-                <div className="ep-info-small">
-                  <h4>{episode.name || `Episode ${episode.ep_num}`}</h4>
-                  <span>{episode.created_at ? 'Several days ago' : 'Unknown date'}</span>
+                <div className="related-info">
+                  <h4>{rec.title?.english || rec.title?.romaji}</h4>
+                  <span className="related-meta">{rec.type || 'TV'}</span>
                 </div>
               </div>
             ))}
           </div>
-
-          <h3 className="section-title mt-4">MORE LIKE THIS</h3>
-          <div className="watch-recommendations-grid">
-            {anime.recommendations?.slice(0, 4).map(rec => (
-              <AnimeCard key={rec.id} anime={rec} />
-            ))}
-          </div>
+          {anime.recommendations?.length > 10 && (
+            <button className="related-view-all">View all ({anime.recommendations.length}) →</button>
+          )}
         </div>
 
       </div>
-    </div>
     </div>
   );
 }
