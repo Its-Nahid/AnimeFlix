@@ -1,5 +1,31 @@
 import { useState, useEffect, useRef } from "react";
 
+const LOGO_MAP = {
+  "classroom of the elite": "https://upload.wikimedia.org/wikipedia/commons/3/37/Classroom_of_the_Elite_Text_Logo_%28English%29.svg",
+  "yokoso jitsuryoku": "https://upload.wikimedia.org/wikipedia/commons/3/37/Classroom_of_the_Elite_Text_Logo_%28English%29.svg",
+  "yōkoso jitsuryoku": "https://upload.wikimedia.org/wikipedia/commons/3/37/Classroom_of_the_Elite_Text_Logo_%28English%29.svg",
+  "re:zero": "https://image.tmdb.org/t/p/original/wNysocYhYIiCNI3SQBBTw0DTkWu.png",
+  "that time i got reincarnated as a slime": "https://static.wikia.nocookie.net/vsbattles/images/4/46/TSSDK_Logo_%28Render%29.png/revision/latest?cb=20181010214854",
+  "witch hat atelier": "https://images.plex.tv/photo?size=large-1280&scale=1&url=https%3A%2F%2Fmetadata-static.plex.tv%2F0%2F683a142553%2F03d37dd25ccc9887acc4f142f0b129e1.png",
+  "tongari boushi": "https://images.plex.tv/photo?size=large-1280&scale=1&url=https%3A%2F%2Fmetadata-static.plex.tv%2F0%2F683a142553%2F03d37dd25ccc9887acc4f142f0b129e1.png",
+  "tongari bōshi": "https://images.plex.tv/photo?size=large-1280&scale=1&url=https%3A%2F%2Fmetadata-static.plex.tv%2F0%2F683a142553%2F03d37dd25ccc9887acc4f142f0b129e1.png",
+  "daemons of the shadow realm": "https://images.plex.tv/photo?size=large-1280&scale=1&url=https%3A%2F%2Fmetadata-static.plex.tv%2F2%2F683a142553%2F2cdc102647fa42aecac68070b395cd13.png",
+  "yomi no tsugai": "https://images.plex.tv/photo?size=large-1280&scale=1&url=https%3A%2F%2Fmetadata-static.plex.tv%2F2%2F683a142553%2F2cdc102647fa42aecac68070b395cd13.png"
+};
+
+const BANNER_MAP = {
+  "re:zero": "https://finalweapon.net/wp-content/uploads/2026/03/ReZERO-Starting-Life-in-Another-World-Season-4-thumbnail.webp",
+  "daemons of the shadow realm": "https://images.alphacoders.com/140/thumb-1920-1407873.jpg",
+  "yomi no tsugai": "https://images.alphacoders.com/140/thumb-1920-1407873.jpg",
+  "that time i got reincarnated as a slime": "https://images4.alphacoders.com/137/1378184.jpg",
+  "witch hat atelier": "https://images.alphacoders.com/140/thumb-1920-1407912.png",
+  "tongari boushi": "https://images.alphacoders.com/140/thumb-1920-1407912.png",
+  "tongari bōshi": "https://images.alphacoders.com/140/thumb-1920-1407912.png",
+  "classroom of the elite": "https://pbs.twimg.com/media/HE1avbFbQAA7uHr.jpg",
+  "yokoso jitsuryoku": "https://pbs.twimg.com/media/HE1avbFbQAA7uHr.jpg",
+  "yōkoso jitsuryoku": "https://pbs.twimg.com/media/HE1avbFbQAA7uHr.jpg"
+};
+
 function Hero({ animeList, onWatchClick }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const timerRef = useRef(null);
@@ -64,7 +90,30 @@ function Hero({ animeList, onWatchClick }) {
 
   const anime = animeList[currentIndex];
   const title = anime.title?.english || anime.title?.romaji || (typeof anime.title === "string" ? anime.title : "Featured Anime");
-  const banner = anime.banner || anime.cover_image?.large || anime.cover_image?.medium || "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200&auto=format&fit=crop";
+  
+  // Resolve clear logo dynamically by checking title matching
+  let logoUrl = anime.clear_logo || null;
+  const englishTitleLower = anime.title?.english?.toLowerCase() || "";
+  const romajiTitleLower = anime.title?.romaji?.toLowerCase() || "";
+  if (!logoUrl) {
+    for (const [key, url] of Object.entries(LOGO_MAP)) {
+      if (englishTitleLower.includes(key) || romajiTitleLower.includes(key)) {
+        logoUrl = url;
+        break;
+      }
+    }
+  }
+
+  // Resolve custom banner background image
+  let customBanner = null;
+  for (const [key, url] of Object.entries(BANNER_MAP)) {
+    if (englishTitleLower.includes(key) || romajiTitleLower.includes(key)) {
+      customBanner = url;
+      break;
+    }
+  }
+
+  const banner = customBanner || anime.banner || anime.cover_image?.large || anime.cover_image?.medium || "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200&auto=format&fit=crop";
   const desc = anime.description || "No synopsis available.";
   const genres = anime.genres || [];
 
@@ -108,8 +157,8 @@ function Hero({ animeList, onWatchClick }) {
         )}
         
         {/* Dynamic Title / Logo display */}
-        {anime.clear_logo ? (
-          <img src={anime.clear_logo} alt={title} className="hero-logo" />
+        {logoUrl ? (
+          <img src={logoUrl} alt={title} className="hero-logo" />
         ) : (
           <h1 className="hero-title">{title}</h1>
         )}
