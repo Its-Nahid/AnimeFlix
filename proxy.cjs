@@ -161,6 +161,7 @@ function decryptSegment(encBuf, keyBuf, ivHex) {
 // ─── Main curl streaming proxy ───────────────────────────────────────────────
 // keyUrl / ivHex: when set, buffer the whole segment, decrypt, then send.
 function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
   const args = [
     '-s', '-i', '-N',
     '-H', `User-Agent: ${USER_AGENT}`,
@@ -323,7 +324,7 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
               if (!orig.startsWith('http://') && !orig.startsWith('https://')) {
                 try { abs = new URL(orig, baseUrl).toString(); } catch (e) { abs = baseUrl + orig; }
               }
-              const proxied = `http://${req.headers.host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
+              const proxied = `${protocol}://${req.headers.host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
               return trimmed.substring(0, us) + proxied + trimmed.substring(ue);
             }
           }
@@ -335,7 +336,7 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
         if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
           try { abs = new URL(trimmed, baseUrl).toString(); } catch (e) { abs = baseUrl + trimmed; }
         }
-        let segUrl = `http://${req.headers.host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
+        let segUrl = `${protocol}://${req.headers.host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
         if (currentRawKeyUrl) {
           const iv = segIdx.toString(16).padStart(32, '0');
           segUrl += `&keyUrl=${encodeURIComponent(currentRawKeyUrl)}&iv=${iv}`;
@@ -996,7 +997,8 @@ const server = http.createServer(async (req, res) => {
         throw new Error('Invalid JSON response from upstream watch solver');
       }
       
-      const selfBase = `http://${req.headers.host}`;
+      const protocol = req.headers['x-forwarded-proto'] || 'http';
+      const selfBase = `${protocol}://${req.headers.host}`;
       const response = {
         id: anilistId, episode: parseInt(ep, 10) || 1,
         server: upstreamWatch.server || serverParam,
