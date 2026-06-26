@@ -27,7 +27,7 @@ lerna-debug.log*
 *.local
 
 # Proxy server (contains upstream URLs, spoofing headers, API routing logic)
-proxy.cjs
+# proxy.cjs
 
 # Large binary / media test files
 segment.ts
