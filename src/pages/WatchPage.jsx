@@ -27,6 +27,11 @@ function WatchPage() {
   const [checkingDub, setCheckingDub] = useState(true);
   const watchDataRef = useRef(null);
 
+  // HLS quality level state
+  const [hlsLevels, setHlsLevels] = useState([]);
+  const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+
   useEffect(() => {
     let isMounted = true;
     async function fetchData() {
@@ -160,7 +165,26 @@ function WatchPage() {
       hlsRef.current = hls;
       hls.loadSource(selectedQuality);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+        // Extract available quality levels
+        const levels = hls.levels.map((level, index) => ({
+          index,
+          height: level.height,
+          width: level.width,
+          bitrate: level.bitrate,
+          label: level.height ? `${level.height}p` : `${Math.round(level.bitrate / 1000)}kbps`
+        }));
+        setHlsLevels(levels);
+        setCurrentLevel(-1); // Start with auto
+        video.play().catch(() => {});
+      });
+      // Track auto-level changes to update UI
+      hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+        // Only update if we're in auto mode
+        if (hls.autoLevelEnabled) {
+          // Don't change currentLevel state, keep it as -1 (auto)
+        }
+      });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = selectedQuality;
       video.addEventListener("loadedmetadata", () => video.play().catch(() => {}));
@@ -223,11 +247,62 @@ function WatchPage() {
 
         {/* CENTER COLUMN: PLAYER + INFO */}
         <div className="watch-center-col">
-          <div className="video-wrapper">
+          <div className="video-wrapper" onClick={() => showQualityMenu && setShowQualityMenu(false)}>
             <div className="server-status-badge">
               <span className="status-dot"></span>
               Auto • {selectedServer}
             </div>
+
+            {/* Quality Selector */}
+            {hlsLevels.length > 1 && (
+              <div className="quality-selector">
+                <button 
+                  className="quality-btn" 
+                  onClick={(e) => { e.stopPropagation(); setShowQualityMenu(!showQualityMenu); }}
+                  title="Quality"
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  </svg>
+                  <span className="quality-current-label">
+                    {currentLevel === -1 ? 'Auto' : hlsLevels.find(l => l.index === currentLevel)?.label || 'Auto'}
+                  </span>
+                </button>
+                {showQualityMenu && (
+                  <div className="quality-menu" onClick={(e) => e.stopPropagation()}>
+                    <div className="quality-menu-title">Quality</div>
+                    <div 
+                      className={`quality-option ${currentLevel === -1 ? 'active' : ''}`}
+                      onClick={() => {
+                        if (hlsRef.current) hlsRef.current.currentLevel = -1;
+                        setCurrentLevel(-1);
+                        setShowQualityMenu(false);
+                      }}
+                    >
+                      <span>Auto</span>
+                      {currentLevel === -1 && <span className="quality-check">✓</span>}
+                    </div>
+                    {[...hlsLevels].sort((a, b) => b.height - a.height).map(level => (
+                      <div 
+                        key={level.index}
+                        className={`quality-option ${currentLevel === level.index ? 'active' : ''}`}
+                        onClick={() => {
+                          if (hlsRef.current) hlsRef.current.currentLevel = level.index;
+                          setCurrentLevel(level.index);
+                          setShowQualityMenu(false);
+                        }}
+                      >
+                        <span>{level.label}</span>
+                        {level.height >= 1080 && <span className="quality-hd-badge">HD</span>}
+                        {currentLevel === level.index && <span className="quality-check">✓</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {playerLoading ? (
               <div className="player-loading">
                 <div className="spinner"></div>
@@ -308,6 +383,73 @@ function WatchPage() {
               </div>
             )}
           </div>
+
+          {/* Seasons / Relations Bar */}
+          {anime.relations && anime.relations.length > 0 && (
+            <div className="watch-seasons-bar">
+              {(() => {
+                // Build the list: current anime + its relations, sorted logically
+                const relationOrder = ['PREQUEL', 'PARENT', 'SIDE_STORY', 'SEQUEL', 'ALTERNATIVE', 'SPIN_OFF', 'OTHER', 'CHARACTER', 'SUMMARY', 'COMPILATION'];
+                const relationLabels = {
+                  'PREQUEL': 'Prequel',
+                  'SEQUEL': 'Sequel',
+                  'SIDE_STORY': 'Side Story',
+                  'PARENT': 'Parent',
+                  'ALTERNATIVE': 'Alternative',
+                  'SPIN_OFF': 'Spin Off',
+                  'OTHER': 'Related',
+                  'CHARACTER': 'Character',
+                  'SUMMARY': 'Summary',
+                  'COMPILATION': 'Compilation'
+                };
+                
+                // Current anime entry
+                const currentEntry = {
+                  id: anime.id,
+                  title: animeTitle,
+                  format: anime.format || 'TV',
+                  isCurrent: true
+                };
+                
+                // Map relations with their labels
+                const relEntries = anime.relations.map(rel => ({
+                  id: rel.id,
+                  title: rel.title?.english || rel.title?.romaji,
+                  format: rel.format,
+                  relation_type: rel.relation_type,
+                  label: relationLabels[rel.relation_type] || rel.relation_type,
+                  isCurrent: false,
+                  cover: rel.cover_image?.large || rel.cover_image?.medium
+                }));
+
+                // Sort: prequels first, then current, then sequels, then others
+                const prequels = relEntries.filter(r => r.relation_type === 'PREQUEL');
+                const sequels = relEntries.filter(r => r.relation_type === 'SEQUEL');
+                const others = relEntries.filter(r => !['PREQUEL', 'SEQUEL'].includes(r.relation_type));
+                
+                const allEntries = [...prequels, currentEntry, ...sequels, ...others];
+
+                return allEntries.map((entry, idx) => (
+                  <div 
+                    key={entry.id}
+                    className={`season-tab ${entry.isCurrent ? 'active' : ''}`}
+                    onClick={() => !entry.isCurrent && navigate(`/anime/${entry.id}`)}
+                    title={entry.title}
+                  >
+                    {entry.cover && (
+                      <img className="season-tab-thumb" src={proxyImage(entry.cover)} alt="" />
+                    )}
+                    <div className="season-tab-text">
+                      <span className="season-tab-label">
+                        {entry.isCurrent ? (entry.format || 'CURRENT') : (entry.label || entry.format)}
+                      </span>
+                      <span className="season-tab-title">{entry.title}</span>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: RELATED ANIME */}

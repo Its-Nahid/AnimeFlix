@@ -589,6 +589,106 @@
   border-radius: 50%;
 }
 
+/* Quality Selector */
+.quality-selector {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 20;
+}
+
+.quality-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quality-btn:hover {
+  background: rgba(0,0,0,0.85);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.quality-current-label {
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.quality-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: rgba(20, 20, 24, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  min-width: 160px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  animation: qualityMenuIn 0.15s ease-out;
+}
+
+@keyframes qualityMenuIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.quality-menu-title {
+  padding: 10px 14px 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.quality-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  font-size: 0.8rem;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.quality-option:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.quality-option.active {
+  color: #e50914;
+  font-weight: 600;
+}
+
+.quality-check {
+  color: #e50914;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.quality-hd-badge {
+  background: #e50914;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+}
+
 /* Server Controls Row */
 .watch-server-row {
   display: flex;
@@ -806,6 +906,97 @@
 
 .star.filled {
   color: #e50914;
+}
+
+/* --- Seasons / Relations Bar --- */
+.watch-seasons-bar {
+  display: flex;
+  gap: 0;
+  background: #0a0a0c;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.watch-seasons-bar::-webkit-scrollbar {
+  height: 3px;
+}
+.watch-seasons-bar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+}
+
+.season-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  min-width: 140px;
+  flex-shrink: 0;
+  position: relative;
+  background: rgba(255,255,255,0.02);
+}
+
+.season-tab:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.season-tab.active {
+  background: rgba(229, 9, 20, 0.08);
+  border-bottom: 3px solid #e50914;
+}
+
+.season-tab.active .season-tab-label {
+  color: #e50914;
+}
+
+.season-tab-thumb {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.season-tab:hover .season-tab-thumb {
+  opacity: 1;
+}
+
+.season-tab.active .season-tab-thumb {
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.3);
+}
+
+.season-tab-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.season-tab-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.season-tab-title {
+  font-size: 0.75rem;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.season-tab.active .season-tab-title {
+  color: #fff;
 }
 
 /* --- RIGHT SIDEBAR: Related Anime --- */
