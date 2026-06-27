@@ -3,12 +3,21 @@ import AnimeCard from "./AnimeCard";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-function AnimeRow({ title, subtitle, url, limit = 0, viewMoreLink = "/search" }) {
+function AnimeRow({ title, subtitle, url, data, limit = 0, viewMoreLink = "/search" }) {
     const [animeList, setAnimeList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (data) {
+            setAnimeList(data);
+            if (data.length > 0) {
+                setLoading(false);
+            }
+            return;
+        }
+
+        if (!url) return;
         let isMounted = true;
         async function fetchAnime() {
             setLoading(true);
@@ -33,7 +42,7 @@ function AnimeRow({ title, subtitle, url, limit = 0, viewMoreLink = "/search" })
         return () => {
             isMounted = false;
         };
-    }, [url]);
+    }, [url, data]);
 
     if (loading) {
         return (

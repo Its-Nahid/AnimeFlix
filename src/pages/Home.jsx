@@ -8,24 +8,24 @@ import { ENDPOINTS } from "../config";
 import axios from "axios";
 
 function Home() {
-    const [heroSlides, setHeroSlides] = useState([]);
+    const [seasonalList, setSeasonalList] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         let isMounted = true;
         async function fetchFeatured() {
             try {
-                // Fetch trending for hero (seasonal is already used by the AnimeRow below)
-                const response = await axios.get(ENDPOINTS.trending);
+                // Fetch seasonal highlights (so user mapped logos/banners display properly)
+                const response = await axios.get(ENDPOINTS.season);
                 if (isMounted) {
                     let list = response.data?.success ? response.data.data : response.data;
                     if (!Array.isArray(list) || list.length === 0) {
-                        // Fallback to seasonal
-                        const seasonRes = await axios.get(ENDPOINTS.season);
-                        list = seasonRes.data?.success ? seasonRes.data.data : seasonRes.data;
+                        // Fallback to trending
+                        const trendingRes = await axios.get(ENDPOINTS.trending);
+                        list = trendingRes.data?.success ? trendingRes.data.data : trendingRes.data;
                     }
                     if (Array.isArray(list) && list.length > 0) {
-                        setHeroSlides(list.slice(0, 5));
+                        setSeasonalList(list);
                     }
                 }
             } catch (err) {
@@ -47,14 +47,14 @@ function Home() {
     return (
         <div className="home-container">
             <Navbar />
-            <Hero animeList={heroSlides} onWatchClick={handleWatchClick} />
+            <Hero animeList={seasonalList.slice(0, 5)} onWatchClick={handleWatchClick} />
             {/* Standard overlapping Netflix spacing with a negative top margin for rows */}
             <div className="rows-container" style={{ position: "relative", zIndex: 10, marginTop: "-60px" }}>
                 <div id="row-recent">
                     <AnimeRow title="Latest Episodes" subtitle="Recently updated releases" url={ENDPOINTS.recent} limit={8} viewMoreLink="/recent" />
                 </div>
                 <div id="row-season">
-                    <AnimeRow title="Seasonal Highlights" subtitle="The best of this season" url={ENDPOINTS.season} limit={8} viewMoreLink="/search?sort=SEASON_YEAR_DESC" />
+                    <AnimeRow title="Seasonal Highlights" subtitle="The best of this season" data={seasonalList} limit={8} viewMoreLink="/search?sort=SEASON_YEAR_DESC" />
                 </div>
                 <div id="row-popular">
                     <AnimeRow title="All-Time Popular" subtitle="Most watched by the community" url={ENDPOINTS.popular} limit={8} viewMoreLink="/search?sort=POPULARITY_DESC" />
