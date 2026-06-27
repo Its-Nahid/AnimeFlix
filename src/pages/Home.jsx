@@ -15,14 +15,14 @@ function Home() {
         let isMounted = true;
         async function fetchFeatured() {
             try {
-                // Fetch the seasonal highlights
-                const response = await axios.get(ENDPOINTS.season);
+                // Fetch trending for hero (seasonal is already used by the AnimeRow below)
+                const response = await axios.get(ENDPOINTS.trending);
                 if (isMounted) {
                     let list = response.data?.success ? response.data.data : response.data;
                     if (!Array.isArray(list) || list.length === 0) {
-                        // Fallback to trending
-                        const trendingRes = await axios.get(ENDPOINTS.trending);
-                        list = trendingRes.data?.success ? trendingRes.data.data : trendingRes.data;
+                        // Fallback to seasonal
+                        const seasonRes = await axios.get(ENDPOINTS.season);
+                        list = seasonRes.data?.success ? seasonRes.data.data : seasonRes.data;
                     }
                     if (Array.isArray(list) && list.length > 0) {
                         setHeroSlides(list.slice(0, 5));

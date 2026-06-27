@@ -5,6 +5,8 @@ const https = require('https');
 const url = require('url');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
+const fs = require('fs');
+const pathLib = require('path');
 
 const PORT = process.env.PORT || 8080;
 const UPSTREAM_BASE = 'https://animetsu.live/v2';
@@ -388,50 +390,250 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
 // ─── AniList GraphQL Integration ─────────────────────────────────────────────
 
 // In-memory cache: cacheKey -> { data, expiry }
+// In-memory cache: cacheKey -> { data, expiry }
 const _anilistCache = {};
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_FILE = pathLib.join(__dirname, 'cache_anilist.json');
+
+// Load cache on startup
+function loadCache() {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      const data = fs.readFileSync(CACHE_FILE, 'utf8');
+      const parsed = JSON.parse(data);
+      let loadedCount = 0;
+      const now = Date.now();
+      for (const [key, val] of Object.entries(parsed)) {
+        // Only load if not expired yet
+        if (val.expiry > now) {
+          _anilistCache[key] = val;
+          loadedCount++;
+        }
+      }
+      console.log(`[Cache Load] Loaded ${loadedCount} active cache items from disk.`);
+    }
+  } catch (err) {
+    console.error(`[Cache Load] Failed to load cache file:`, err.message);
+  }
+}
+
+// Debounced save to disk
+let saveTimeout = null;
+function saveCacheDebounced() {
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    try {
+      // Clean up expired items before saving
+      const now = Date.now();
+      const toSave = {};
+      for (const [key, val] of Object.entries(_anilistCache)) {
+        if (val.expiry > now) {
+          toSave[key] = val;
+        }
+      }
+      fs.writeFileSync(CACHE_FILE, JSON.stringify(toSave, null, 2), 'utf8');
+      console.log(`[Cache Save] Saved cache to disk.`);
+    } catch (err) {
+      console.error(`[Cache Save] Failed to save cache file:`, err.message);
+    }
+  }, 5000); // 5 seconds debounce
+}
+
+// Tiered cache TTLs — list data changes rarely, details are stable, recent changes more
+const CACHE_TTL_LIST_MS    = 30 * 60 * 1000; // 30 minutes for trending/popular/season/top-rated/upcoming
+const CACHE_TTL_DETAILS_MS = 15 * 60 * 1000; // 15 minutes for individual anime details
+const CACHE_TTL_RECENT_MS  = 10 * 60 * 1000; // 10 minutes for recent/airing schedule
+const CACHE_TTL_DEFAULT_MS = 10 * 60 * 1000; // 10 minutes default
+
+// ─── Request deduplication: in-flight promises keyed by cache key ─────────────
+// If the same query+variables is already in-flight, return the same promise
+// instead of making a duplicate network request (thundering herd prevention)
+const _anilistInflight = {}; // cacheKey -> Promise
+
+// ─── Serial request queue (rate limiter) ─────────────────────────────────────
+// AniList allows ~90 req/min. We serialize requests with a minimum gap of
+// 700ms between calls to stay well under the limit even with sustained use.
+const ANILIST_MIN_INTERVAL_MS = 700;
+let _anilistLastRequestTime = 0;
+const _anilistQueue = [];      // Array of { resolve, reject, fn }
+let _anilistQueueRunning = false;
+
+async function _processAnilistQueue() {
+  if (_anilistQueueRunning) return;
+  _anilistQueueRunning = true;
+  while (_anilistQueue.length > 0) {
+    const { resolve, reject, fn } = _anilistQueue.shift();
+    const elapsed = Date.now() - _anilistLastRequestTime;
+    if (elapsed < ANILIST_MIN_INTERVAL_MS) {
+      await new Promise(r => setTimeout(r, ANILIST_MIN_INTERVAL_MS - elapsed));
+    }
+    try {
+      const result = await fn();
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    }
+    _anilistLastRequestTime = Date.now();
+  }
+  _anilistQueueRunning = false;
+}
+
+function _enqueueAnilistRequest(fn) {
+  return new Promise((resolve, reject) => {
+    _anilistQueue.push({ resolve, reject, fn });
+    _processAnilistQueue();
+  });
+}
 
 function anilistCacheKey(query, variables) {
   return JSON.stringify({ q: query.trim().replace(/\s+/g, ' '), v: variables });
 }
 
-async function fetchAniList(query, variables = {}) {
+/**
+ * Determines the appropriate cache TTL based on the query content.
+ */
+function getCacheTTL(query) {
+  const q = query.trim();
+  if (q.includes('airingSchedules'))      return CACHE_TTL_RECENT_MS;
+  if (q.includes('Page') && q.includes('media (')) return CACHE_TTL_LIST_MS;
+  if (q.includes('Media (id:') || q.includes('Media(id:')) return CACHE_TTL_DETAILS_MS;
+  return CACHE_TTL_DEFAULT_MS;
+}
+
+async function fetchAniList(query, variables = {}, { cacheTtl } = {}) {
   const key = anilistCacheKey(query, variables);
 
   // Return from cache if still fresh
   const cached = _anilistCache[key];
   if (cached && Date.now() < cached.expiry) {
+    console.log(`[AniList Cache HIT] ${key.slice(0, 80)}...`);
     return cached.data;
   }
 
-  // Retry with backoff on 429
-  let lastErr;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) {
-      await new Promise(r => setTimeout(r, 1000 * attempt)); // 1s, 2s backoff
-    }
-    const res = await fetch('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ query, variables })
-    });
-    if (res.status === 429) {
-      lastErr = new Error('AniList rate limited (429)');
-      continue; // retry
-    }
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`AniList error ${res.status}: ${errText}`);
-    }
-    const json = await res.json();
-    // Store in cache
-    _anilistCache[key] = { data: json.data, expiry: Date.now() + CACHE_TTL_MS };
-    return json.data;
+  // Request deduplication: if same request is already in-flight, piggyback on it
+  if (_anilistInflight[key]) {
+    console.log(`[AniList Coalesce] Reusing in-flight request for ${key.slice(0, 60)}...`);
+    return _anilistInflight[key];
   }
-  throw lastErr;
+
+  const ttl = cacheTtl || getCacheTTL(query);
+
+  // Wrap the actual fetch in a deduplication promise
+  const requestPromise = _enqueueAnilistRequest(async () => {
+    // Double-check cache (another queued request may have populated it)
+    const freshCached = _anilistCache[key];
+    if (freshCached && Date.now() < freshCached.expiry) {
+      console.log(`[AniList Cache HIT (post-queue)] ${key.slice(0, 60)}...`);
+      return freshCached.data;
+    }
+
+    console.log(`[AniList Fetch] ${key.slice(0, 80)}...`);
+    let lastErr;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) {
+        // Exponential backoff: 2s, 5s
+        const backoffMs = attempt === 1 ? 2000 : 5000;
+        console.warn(`[AniList Retry] Attempt ${attempt + 1}/3 after ${backoffMs}ms backoff`);
+        await new Promise(r => setTimeout(r, backoffMs));
+      }
+      const res = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'AnimeFlix-App/3.0 (contact: github.com/Its-Nahid/AnimeFlix)'
+        },
+        body: JSON.stringify({ query, variables })
+      });
+
+      // Read rate limit headers for smarter throttling
+      const remaining = parseInt(res.headers.get('x-ratelimit-remaining'), 10);
+      const retryAfter = parseInt(res.headers.get('retry-after'), 10);
+      if (!isNaN(remaining) && remaining < 15) {
+        console.warn(`[AniList Rate] Only ${remaining} requests remaining in window`);
+      }
+
+      if (res.status === 429) {
+        const waitMs = (!isNaN(retryAfter) && retryAfter > 0) ? retryAfter * 1000 : (2000 * (attempt + 1));
+        console.warn(`[AniList 429] Rate limited. Waiting ${waitMs}ms (Retry-After: ${retryAfter || 'none'})`);
+        lastErr = new Error('AniList rate limited (429)');
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`AniList error ${res.status}: ${errText}`);
+      }
+      const json = await res.json();
+      // Store in cache with appropriate TTL
+      _anilistCache[key] = { data: json.data, expiry: Date.now() + ttl };
+      saveCacheDebounced();
+      return json.data;
+    }
+    throw lastErr;
+  });
+
+  // Register as in-flight, clean up when done
+  _anilistInflight[key] = requestPromise;
+  requestPromise.finally(() => { delete _anilistInflight[key]; });
+
+  return requestPromise;
+}
+
+// Background cache warm-up on boot
+async function warmupCache() {
+  console.log('[Cache Warm-up] Starting background cache warm-up...');
+  try {
+    const curSeason = getCurrentSeason();
+    const FIVE_MIN_SECS = 5 * 60;
+    const now = Math.floor(Date.now() / 1000 / FIVE_MIN_SECS) * FIVE_MIN_SECS;
+
+    const railsToWarm = [
+      {
+        name: 'recent',
+        query: RECENT_EPISODES_QUERY,
+        variables: { page: 1, perPage: 16, now }
+      },
+      {
+        name: 'trending/hero',
+        query: ANIME_LIST_QUERY,
+        variables: { sort: ['TRENDING_DESC'], page: 1, perPage: 12 }
+      },
+      {
+        name: 'season',
+        query: ANIME_LIST_QUERY,
+        variables: { sort: ['POPULARITY_DESC'], season: curSeason.season, seasonYear: curSeason.year, page: 1, perPage: 12 }
+      },
+      {
+        name: 'popular',
+        query: ANIME_LIST_QUERY,
+        variables: { sort: ['POPULARITY_DESC'], page: 1, perPage: 12 }
+      },
+      {
+        name: 'top-rated',
+        query: ANIME_LIST_QUERY,
+        variables: { sort: ['SCORE_DESC'], page: 1, perPage: 12 }
+      },
+      {
+        name: 'upcoming',
+        query: ANIME_LIST_QUERY,
+        variables: { sort: ['POPULARITY_DESC'], status: 'NOT_YET_RELEASED', page: 1, perPage: 12 }
+      }
+    ];
+
+    for (const rail of railsToWarm) {
+      try {
+        console.log(`[Cache Warm-up] Pre-fetching ${rail.name}...`);
+        await fetchAniList(rail.query, rail.variables);
+        // Space them out slightly to keep AniList queue relaxed
+        await new Promise(r => setTimeout(r, 1000));
+      } catch (err) {
+        console.error(`[Cache Warm-up Failed] ${rail.name}:`, err.message);
+      }
+    }
+    console.log('[Cache Warm-up] Background cache warm-up complete.');
+  } catch (err) {
+    console.error('[Cache Warm-up Error]:', err.message);
+  }
 }
 
 function formatStartDate(sd) {
@@ -770,7 +972,10 @@ const server = http.createServer(async (req, res) => {
       if (path === '/api/recent') {
         const page = parseInt(parsedUrl.searchParams.get('page'), 10) || 1;
         const perPage = parseInt(parsedUrl.searchParams.get('per_page'), 10) || 16;
-        const now = Math.floor(Date.now() / 1000);
+        // Round to nearest 5-minute boundary so cache key stays stable
+        // (prevents each second producing a unique cache key that never hits)
+        const FIVE_MIN_SECS = 5 * 60;
+        const now = Math.floor(Date.now() / 1000 / FIVE_MIN_SECS) * FIVE_MIN_SECS;
         const data = await fetchAniList(RECENT_EPISODES_QUERY, { page, perPage, now });
         
         const list = data?.Page?.airingSchedules?.map(sched => {
@@ -1093,4 +1298,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Node-Animetsu-API CORS Proxy is listening on port ${PORT} at http://0.0.0.0:${PORT}`);
+  loadCache();
+  warmupCache();
 });
