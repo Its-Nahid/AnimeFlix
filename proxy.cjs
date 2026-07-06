@@ -103,6 +103,8 @@ function mapAnikotoMedia(media) {
     description: media.description || '',
     season: media.season ? media.season.toUpperCase() : null,
     start_date: formatStartDateAnikoto(media.aired, media.year),
+    sub_count: typeof media.is_sub === 'number' ? media.is_sub : null,
+    dub_count: typeof media.is_dub === 'number' ? media.is_dub : null,
     next_airing_ep: (media.next_air_schedule_time && media.next_air_ep) ? {
       ep_num: media.next_air_ep,
       time_left: Math.max(0, media.next_air_schedule_time - Math.floor(Date.now() / 1000))

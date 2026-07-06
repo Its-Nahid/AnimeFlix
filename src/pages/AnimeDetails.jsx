@@ -151,6 +151,8 @@ function AnimeDetail() {
               <div className="title-meta-new">
                 {anime.format && <span className="meta-tag format">{anime.format}</span>}
                 {anime.total_eps && <span className="meta-tag">{anime.total_eps} episodes</span>}
+                {anime.sub_count !== null && <span className="meta-tag sub-tag">Sub: {anime.sub_count}</span>}
+                {anime.dub_count !== null && <span className="meta-tag dub-tag">Dub: {anime.dub_count}</span>}
                 {anime.status && <span className="meta-tag status">[{anime.status}]</span>}
                 {anime.start_date && <span className="meta-tag">{anime.start_date}</span>}
                 {anime.season && <span className="meta-tag season">{anime.season} {anime.year}</span>}

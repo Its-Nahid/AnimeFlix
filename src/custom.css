@@ -1460,3 +1460,27 @@
   right: 40px;
   z-index: 200;
 }
+
+.meta-tag.sub-tag {
+  background: rgba(162, 230, 150, 0.2);
+  color: #a2e696;
+}
+.meta-tag.dub-tag {
+  background: rgba(150, 190, 255, 0.2);
+  color: #96beff;
+}
+
+
+.hero-title {
+  font-size: 2.5rem !important;
+}
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 1.8rem !important;
+  }
+}
+.search-grid .new-card-design,
+.search-grid .anime-card-link {
+  width: 100% !important;
+}
+

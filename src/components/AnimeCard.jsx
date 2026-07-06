@@ -21,8 +21,8 @@ function AnimeCard({ anime }) {
   const totalEps = anime.total_eps || anime.total_episodes || null;
 
   // 1. Determine sub count
-  let subCount = anime.episodes?.sub || anime.sub;
-  if (!subCount) {
+  let subCount = anime.sub_count !== undefined && anime.sub_count !== null ? anime.sub_count : (anime.episodes?.sub || anime.sub);
+  if (subCount === undefined || subCount === null || subCount === '') {
     if (isRecent) {
       subCount = anime.ep_num;
     } else if (anime.next_airing_ep) {
@@ -33,8 +33,8 @@ function AnimeCard({ anime }) {
   }
 
   // 2. Determine dub count
-  let dubCount = anime.episodes?.dub || anime.dub;
-  if (dubCount === undefined || dubCount === null) {
+  let dubCount = anime.dub_count !== undefined && anime.dub_count !== null ? anime.dub_count : (anime.episodes?.dub || anime.dub);
+  if (dubCount === undefined || dubCount === null || dubCount === '') {
     if (isRecent) {
       dubCount = null;
     } else if (anime.next_airing_ep) {
