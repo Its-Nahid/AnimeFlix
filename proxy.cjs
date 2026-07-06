@@ -17,44 +17,117 @@ const ORIGIN = 'https://animetsu.live';
 // In-memory key cache: keyUrl -> Buffer(16)
 const keyCache = {};
 
-// ─── AniList → Animetsu ID Mapping ──────────────────────────────────────────
-// The frontend uses AniList numeric IDs, but the upstream animetsu streaming
-// endpoint requires its own internal hex IDs. This cache + resolver bridges
-// the gap.
+
+// ─── Local Database (anikoto_db.json) ─────────────────────────────────────────
+let db = [];
+const DB_PATH = pathLib.join(__dirname, 'anikoto_db.json');
+
+function loadDB() {
+  try {
+    if (fs.existsSync(DB_PATH)) {
+      const data = fs.readFileSync(DB_PATH, 'utf8');
+      db = JSON.parse(data);
+      console.log(`[DB Load] Loaded ${db.length} items from anikoto_db.json`);
+    } else {
+      console.warn(`[DB Load] anikoto_db.json not found!`);
+    }
+  } catch (err) {
+    console.error(`[DB Load] Failed to load DB:`, err.message);
+  }
+}
+
+async function syncDB() {
+  console.log('[DB Sync] Fetching recent updates...');
+  try {
+    const res = await fetch('https://anikotoapi.site/recent-anime');
+    if (!res.ok) throw new Error(`Failed to fetch sync data: ${res.status}`);
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      let updatedCount = 0;
+      for (const item of data) {
+        const index = db.findIndex(x => String(x.ani_id) === String(item.ani_id) || String(x.id) === String(item.id));
+        if (index !== -1) {
+          db[index] = { ...db[index], ...item };
+          updatedCount++;
+        } else {
+          db.unshift(item);
+          updatedCount++;
+        }
+      }
+      if (updatedCount > 0) {
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+        console.log(`[DB Sync] Updated ${updatedCount} items and saved to disk.`);
+      }
+    }
+  } catch (err) {
+    console.error('[DB Sync Error]:', err.message);
+  }
+}
+
+setInterval(syncDB, 10 * 60 * 1000);
+
+function getMediaById(id) {
+  return db.find(m => String(m.ani_id) === String(id) || String(m.id) === String(id));
+}
+
+function formatStartDateAnikoto(airedStr, yearNum) {
+  if (airedStr && airedStr.includes(' to ')) {
+    return airedStr.split(' to ')[0];
+  }
+  return yearNum ? String(yearNum) : null;
+}
+
+function mapAnikotoMedia(media) {
+  if (!media) return null;
+  return {
+    id: media.ani_id || media.id,
+    mal_id: media.mal_id || media.id,
+    title: {
+      english: media.title,
+      romaji: media.alternative || media.title,
+      native: media.native || media.title
+    },
+    cover_image: {
+      large: media.poster || ''
+    },
+    banner: media.background_image || media.poster || '',
+    average_score: media.score ? parseFloat(media.score) * 10 : null,
+    mean_score: media.score ? parseFloat(media.score) * 10 : null,
+    year: media.year || null,
+    format: media.terms_by_type?.type?.[0] || 'TV',
+    isAdult: false,
+    status: media.status === 'Currently Airing' ? 'RELEASING' : (media.status === 'Finished Airing' ? 'FINISHED' : 'NOT_YET_RELEASED'),
+    total_eps: parseInt(media.episodes, 10) || null,
+    genres: media.terms_by_type?.genre || [],
+    duration: media.duration ? parseInt(media.duration) : null,
+    description: media.description || '',
+    season: media.season ? media.season.toUpperCase() : null,
+    start_date: formatStartDateAnikoto(media.aired, media.year),
+    next_airing_ep: (media.next_air_schedule_time && media.next_air_ep) ? {
+      ep_num: media.next_air_ep,
+      time_left: Math.max(0, media.next_air_schedule_time - Math.floor(Date.now() / 1000))
+    } : null,
+    characters: [],
+    staff: [],
+    relations: [],
+    recommendations: []
+  };
+}
+
 const _anilistToAnimetsuCache = {}; // anilistId -> animetsuId
 
-/**
- * Resolves an AniList numeric ID to the upstream animetsu internal ID.
- * Steps:
- *   1. Check in-memory cache
- *   2. Get the anime title from AniList
- *   3. Search upstream animetsu by that title
- *   4. For each search result, fetch upstream info to find anilist_id match
- *   5. Cache and return the animetsu ID
- * @param {string|number} anilistId - AniList numeric ID
- * @returns {Promise<string|null>} animetsu internal ID or null if not found
- */
 async function resolveAnimetsuId(anilistId) {
   const id = String(anilistId);
   if (_anilistToAnimetsuCache[id]) return _anilistToAnimetsuCache[id];
 
   try {
-    // Step 1: Get anime title from AniList
-    const anilistData = await fetchAniList(`
-      query ($id: Int) {
-        Media (id: $id, type: ANIME) {
-          title { romaji english }
-        }
-      }
-    `, { id: parseInt(id, 10) });
-
-    const title = anilistData?.Media?.title?.romaji || anilistData?.Media?.title?.english;
+    const media = getMediaById(id);
+    const title = media?.title || media?.alternative;
     if (!title) {
-      console.error(`[ID Resolve] No title found on AniList for ID ${id}`);
+      console.error(`[ID Resolve] No title found in DB for ID ${id}`);
       return null;
     }
 
-    // Step 2: Search upstream animetsu by title
     const searchUrl = `${UPSTREAM_BASE}/api/anime/search?query=${encodeURIComponent(title)}`;
     const searchBuf = await curlFetchRaw(searchUrl);
     let searchData;
@@ -67,12 +140,10 @@ async function resolveAnimetsuId(anilistId) {
 
     const results = searchData?.results || [];
     if (results.length === 0) {
-      console.warn(`[ID Resolve] No upstream results for title "${title}"`);
+      console.warn(`[ID Resolve] No upstream results for title '${title}'`);
       return null;
     }
 
-    // Step 3: Check each result's info for matching anilist_id
-    // Try exact title match first to minimize info fetches
     const titleLower = title.toLowerCase();
     const sortedResults = results.sort((a, b) => {
       const aMatch = (a.title?.romaji || '').toLowerCase() === titleLower ? 0 : 1;
@@ -91,19 +162,18 @@ async function resolveAnimetsuId(anilistId) {
       }
 
       if (String(infoData?.anilist_id) === id) {
-        console.log(`[ID Resolve] Mapped AniList ${id} → animetsu ${result.id} ("${title}")`);
+        console.log(`[ID Resolve] Mapped AniList ${id} -> animetsu ${result.id} ('${title}')`);
         _anilistToAnimetsuCache[id] = result.id;
         return result.id;
       }
     }
 
-    // Fallback: if no anilist_id match, use the first result with matching title
     const fallback = results.find(r =>
       (r.title?.romaji || '').toLowerCase() === titleLower ||
       (r.title?.english || '').toLowerCase() === titleLower
     );
     if (fallback) {
-      console.warn(`[ID Resolve] Fallback title match: AniList ${id} → animetsu ${fallback.id} ("${title}")`);
+      console.warn(`[ID Resolve] Fallback title match: AniList ${id} -> animetsu ${fallback.id} ('${title}')`);
       _anilistToAnimetsuCache[id] = fallback.id;
       return fallback.id;
     }
@@ -386,544 +456,6 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
   });
 }
 
-// ─── Upstream JSON helper ────────────────────────────────────────────────────
-// ─── AniList GraphQL Integration ─────────────────────────────────────────────
-
-// In-memory cache: cacheKey -> { data, expiry }
-// In-memory cache: cacheKey -> { data, expiry }
-const _anilistCache = {};
-const CACHE_FILE = pathLib.join(__dirname, 'cache_anilist.json');
-
-// Load cache on startup
-function loadCache() {
-  try {
-    if (fs.existsSync(CACHE_FILE)) {
-      const data = fs.readFileSync(CACHE_FILE, 'utf8');
-      const parsed = JSON.parse(data);
-      let loadedCount = 0;
-      const now = Date.now();
-      for (const [key, val] of Object.entries(parsed)) {
-        // Only load if not expired yet
-        if (val.expiry > now) {
-          _anilistCache[key] = val;
-          loadedCount++;
-        }
-      }
-      console.log(`[Cache Load] Loaded ${loadedCount} active cache items from disk.`);
-    }
-  } catch (err) {
-    console.error(`[Cache Load] Failed to load cache file:`, err.message);
-  }
-}
-
-// Debounced save to disk
-let saveTimeout = null;
-function saveCacheDebounced() {
-  if (saveTimeout) clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    try {
-      // Clean up expired items before saving
-      const now = Date.now();
-      const toSave = {};
-      for (const [key, val] of Object.entries(_anilistCache)) {
-        if (val.expiry > now) {
-          toSave[key] = val;
-        }
-      }
-      fs.writeFileSync(CACHE_FILE, JSON.stringify(toSave, null, 2), 'utf8');
-      console.log(`[Cache Save] Saved cache to disk.`);
-    } catch (err) {
-      console.error(`[Cache Save] Failed to save cache file:`, err.message);
-    }
-  }, 5000); // 5 seconds debounce
-}
-
-// Tiered cache TTLs — list data changes rarely, details are stable, recent changes more
-const CACHE_TTL_LIST_MS    = 30 * 60 * 1000; // 30 minutes for trending/popular/season/top-rated/upcoming
-const CACHE_TTL_DETAILS_MS = 15 * 60 * 1000; // 15 minutes for individual anime details
-const CACHE_TTL_RECENT_MS  = 10 * 60 * 1000; // 10 minutes for recent/airing schedule
-const CACHE_TTL_DEFAULT_MS = 10 * 60 * 1000; // 10 minutes default
-
-// ─── Request deduplication: in-flight promises keyed by cache key ─────────────
-// If the same query+variables is already in-flight, return the same promise
-// instead of making a duplicate network request (thundering herd prevention)
-const _anilistInflight = {}; // cacheKey -> Promise
-
-// ─── Serial request queue (rate limiter) ─────────────────────────────────────
-// AniList allows ~90 req/min. We serialize requests with a minimum gap of
-// 700ms between calls to stay well under the limit even with sustained use.
-const ANILIST_MIN_INTERVAL_MS = 700;
-let _anilistLastRequestTime = 0;
-const _anilistQueue = [];      // Array of { resolve, reject, fn }
-let _anilistQueueRunning = false;
-
-async function _processAnilistQueue() {
-  if (_anilistQueueRunning) return;
-  _anilistQueueRunning = true;
-  while (_anilistQueue.length > 0) {
-    const { resolve, reject, fn } = _anilistQueue.shift();
-    const elapsed = Date.now() - _anilistLastRequestTime;
-    if (elapsed < ANILIST_MIN_INTERVAL_MS) {
-      await new Promise(r => setTimeout(r, ANILIST_MIN_INTERVAL_MS - elapsed));
-    }
-    try {
-      const result = await fn();
-      resolve(result);
-    } catch (err) {
-      reject(err);
-    }
-    _anilistLastRequestTime = Date.now();
-  }
-  _anilistQueueRunning = false;
-}
-
-function _enqueueAnilistRequest(fn) {
-  return new Promise((resolve, reject) => {
-    _anilistQueue.push({ resolve, reject, fn });
-    _processAnilistQueue();
-  });
-}
-
-function anilistCacheKey(query, variables) {
-  return JSON.stringify({ q: query.trim().replace(/\s+/g, ' '), v: variables });
-}
-
-/**
- * Determines the appropriate cache TTL based on the query content.
- */
-function getCacheTTL(query) {
-  const q = query.trim();
-  if (q.includes('airingSchedules'))      return CACHE_TTL_RECENT_MS;
-  if (q.includes('Page') && q.includes('media (')) return CACHE_TTL_LIST_MS;
-  if (q.includes('Media (id:') || q.includes('Media(id:')) return CACHE_TTL_DETAILS_MS;
-  return CACHE_TTL_DEFAULT_MS;
-}
-
-async function fetchAniList(query, variables = {}, { cacheTtl } = {}) {
-  const key = anilistCacheKey(query, variables);
-
-  // Return from cache if still fresh
-  const cached = _anilistCache[key];
-  if (cached && Date.now() < cached.expiry) {
-    console.log(`[AniList Cache HIT] ${key.slice(0, 80)}...`);
-    return cached.data;
-  }
-
-  // Request deduplication: if same request is already in-flight, piggyback on it
-  if (_anilistInflight[key]) {
-    console.log(`[AniList Coalesce] Reusing in-flight request for ${key.slice(0, 60)}...`);
-    return _anilistInflight[key];
-  }
-
-  const ttl = cacheTtl || getCacheTTL(query);
-
-  // Wrap the actual fetch in a deduplication promise
-  const requestPromise = _enqueueAnilistRequest(async () => {
-    // Double-check cache (another queued request may have populated it)
-    const freshCached = _anilistCache[key];
-    if (freshCached && Date.now() < freshCached.expiry) {
-      console.log(`[AniList Cache HIT (post-queue)] ${key.slice(0, 60)}...`);
-      return freshCached.data;
-    }
-
-    console.log(`[AniList Fetch] ${key.slice(0, 80)}...`);
-    let lastErr;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (attempt > 0) {
-        // Exponential backoff: 2s, 5s
-        const backoffMs = attempt === 1 ? 2000 : 5000;
-        console.warn(`[AniList Retry] Attempt ${attempt + 1}/3 after ${backoffMs}ms backoff`);
-        await new Promise(r => setTimeout(r, backoffMs));
-      }
-      const res = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'User-Agent': 'AnimeFlix-App/3.0 (contact: github.com/Its-Nahid/AnimeFlix)'
-        },
-        body: JSON.stringify({ query, variables })
-      });
-
-      // Read rate limit headers for smarter throttling
-      const remaining = parseInt(res.headers.get('x-ratelimit-remaining'), 10);
-      const retryAfter = parseInt(res.headers.get('retry-after'), 10);
-      if (!isNaN(remaining) && remaining < 15) {
-        console.warn(`[AniList Rate] Only ${remaining} requests remaining in window`);
-      }
-
-      if (res.status === 429) {
-        const waitMs = (!isNaN(retryAfter) && retryAfter > 0) ? retryAfter * 1000 : (2000 * (attempt + 1));
-        console.warn(`[AniList 429] Rate limited. Waiting ${waitMs}ms (Retry-After: ${retryAfter || 'none'})`);
-        lastErr = new Error('AniList rate limited (429)');
-        await new Promise(r => setTimeout(r, waitMs));
-        continue;
-      }
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`AniList error ${res.status}: ${errText}`);
-      }
-      const json = await res.json();
-      // Store in cache with appropriate TTL
-      _anilistCache[key] = { data: json.data, expiry: Date.now() + ttl };
-      saveCacheDebounced();
-      return json.data;
-    }
-    throw lastErr;
-  });
-
-  // Register as in-flight, clean up when done
-  _anilistInflight[key] = requestPromise;
-  requestPromise.finally(() => { delete _anilistInflight[key]; });
-
-  return requestPromise;
-}
-
-// Background cache warm-up on boot
-async function warmupCache() {
-  console.log('[Cache Warm-up] Starting background cache warm-up...');
-  try {
-    const curSeason = getCurrentSeason();
-    const FIVE_MIN_SECS = 5 * 60;
-    const now = Math.floor(Date.now() / 1000 / FIVE_MIN_SECS) * FIVE_MIN_SECS;
-
-    const railsToWarm = [
-      {
-        name: 'recent',
-        query: RECENT_EPISODES_QUERY,
-        variables: { page: 1, perPage: 16, now }
-      },
-      {
-        name: 'trending/hero',
-        query: ANIME_LIST_QUERY,
-        variables: { sort: ['TRENDING_DESC'], page: 1, perPage: 12 }
-      },
-      {
-        name: 'season',
-        query: ANIME_LIST_QUERY,
-        variables: { sort: ['POPULARITY_DESC'], season: curSeason.season, seasonYear: curSeason.year, page: 1, perPage: 12 }
-      },
-      {
-        name: 'popular',
-        query: ANIME_LIST_QUERY,
-        variables: { sort: ['POPULARITY_DESC'], page: 1, perPage: 12 }
-      },
-      {
-        name: 'top-rated',
-        query: ANIME_LIST_QUERY,
-        variables: { sort: ['SCORE_DESC'], page: 1, perPage: 12 }
-      },
-      {
-        name: 'upcoming',
-        query: ANIME_LIST_QUERY,
-        variables: { sort: ['POPULARITY_DESC'], status: 'NOT_YET_RELEASED', page: 1, perPage: 12 }
-      }
-    ];
-
-    for (const rail of railsToWarm) {
-      try {
-        console.log(`[Cache Warm-up] Pre-fetching ${rail.name}...`);
-        await fetchAniList(rail.query, rail.variables);
-        // Space them out slightly to keep AniList queue relaxed
-        await new Promise(r => setTimeout(r, 1000));
-      } catch (err) {
-        console.error(`[Cache Warm-up Failed] ${rail.name}:`, err.message);
-      }
-    }
-    console.log('[Cache Warm-up] Background cache warm-up complete.');
-  } catch (err) {
-    console.error('[Cache Warm-up Error]:', err.message);
-  }
-}
-
-function formatStartDate(sd) {
-  if (!sd || !sd.year) return null;
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  if (!sd.month) return `${sd.year}`;
-  if (!sd.day) return `${months[sd.month - 1]} ${sd.year}`;
-  return `${months[sd.month - 1]} ${sd.day}, ${sd.year}`;
-}
-
-function mapAniListMedia(media) {
-  if (!media) return null;
-  return {
-    id: media.id,
-    mal_id: media.idMal || media.id,
-    title: {
-      english: media.title.english || media.title.romaji,
-      romaji: media.title.romaji,
-      native: media.title.native
-    },
-    cover_image: {
-      large: media.coverImage?.large || media.coverImage?.extraLarge || ''
-    },
-    banner: media.bannerImage || media.coverImage?.extraLarge || '',
-    average_score: media.averageScore || null,
-    mean_score: media.averageScore || null,
-    year: media.seasonYear || null,
-    format: media.format || 'TV',
-    isAdult: media.isAdult || false,
-    status: media.status || 'FINISHED',
-    total_eps: media.episodes || null,
-    genres: media.genres || [],
-    duration: media.duration || null,
-    description: media.description || '',
-    season: media.season || null,
-    start_date: formatStartDate(media.startDate),
-    next_airing_ep: media.nextAiringEpisode ? {
-      ep_num: media.nextAiringEpisode.episode,
-      time_left: media.nextAiringEpisode.timeUntilAiring
-    } : null,
-    characters: media.characters?.edges?.map(edge => ({
-      name: edge.node.name.full,
-      role: edge.role,
-      image: edge.node.image?.large || edge.node.image?.medium || ''
-    })) || [],
-    staff: media.staff?.edges?.map(edge => ({
-      name: edge.node.name.full,
-      role: edge.role,
-      image: edge.node.image?.large || edge.node.image?.medium || ''
-    })) || [],
-    relations: media.relations?.edges?.map(edge => {
-      const relNode = edge.node;
-      if (!relNode) return null;
-      // Only include anime relations (sequels, prequels, side stories, etc.)
-      if (relNode.type !== 'ANIME') return null;
-      return {
-        id: relNode.id,
-        mal_id: relNode.idMal || relNode.id,
-        title: {
-          english: relNode.title?.english || relNode.title?.romaji,
-          romaji: relNode.title?.romaji
-        },
-        cover_image: {
-          large: relNode.coverImage?.large || '',
-          medium: relNode.coverImage?.medium || ''
-        },
-        relation_type: edge.relationType,
-        format: relNode.format || 'TV',
-        status: relNode.status || 'FINISHED',
-        episodes: relNode.episodes || null
-      };
-    }).filter(Boolean) || [],
-    recommendations: media.recommendations?.edges?.map(edge => {
-      const recMedia = edge.node.mediaRecommendation;
-      if (!recMedia) return null;
-      return {
-        id: recMedia.id,
-        mal_id: recMedia.idMal || recMedia.id,
-        title: {
-          english: recMedia.title.english || recMedia.title.romaji,
-          romaji: recMedia.title.romaji
-        },
-        cover_image: {
-          large: recMedia.coverImage?.large || ''
-        }
-      };
-    }).filter(Boolean) || []
-  };
-}
-
-function getCurrentSeason() {
-  const date = new Date();
-  const month = date.getMonth(); // 0-11
-  // Spring: March (2) to June (5)
-  if (month >= 2 && month <= 5) return { season: 'SPRING', year: date.getFullYear() };
-  // Summer: July (6) to September (8)
-  if (month >= 6 && month <= 8) return { season: 'SUMMER', year: date.getFullYear() };
-  // Fall: October (9) to November (10)
-  if (month >= 9 && month <= 10) return { season: 'FALL', year: date.getFullYear() };
-  // Winter: December (11), January (0), February (1)
-  const year = month === 11 ? date.getFullYear() + 1 : date.getFullYear();
-  return { season: 'WINTER', year };
-}
-
-const ANIME_DETAILS_QUERY = `
-  query ($id: Int) {
-    Media (id: $id, type: ANIME) {
-      id
-      idMal
-      title {
-        romaji
-        english
-        native
-      }
-      coverImage {
-        large
-        extraLarge
-      }
-      bannerImage
-      averageScore
-      seasonYear
-      format
-      isAdult
-      status
-      episodes
-      genres
-      duration
-      description
-      season
-      startDate {
-        year
-        month
-        day
-      }
-      nextAiringEpisode {
-        episode
-        timeUntilAiring
-      }
-      characters (sort: [ROLE, RELEVANCE, ID]) {
-        edges {
-          role
-          node {
-            name {
-              full
-            }
-            image {
-              large
-              medium
-            }
-          }
-        }
-      }
-      staff {
-        edges {
-          role
-          node {
-            name {
-              full
-            }
-            image {
-              large
-              medium
-            }
-          }
-        }
-      }
-      relations {
-        edges {
-          relationType
-          node {
-            id
-            idMal
-            type
-            format
-            status
-            episodes
-            title {
-              romaji
-              english
-            }
-            coverImage {
-              large
-              medium
-            }
-          }
-        }
-      }
-      recommendations (sort: [RATING_DESC, ID]) {
-        edges {
-          node {
-            mediaRecommendation {
-              id
-              idMal
-              title {
-                romaji
-                english
-              }
-              coverImage {
-                large
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const ANIME_LIST_QUERY = `
-  query ($search: String, $genres: [String], $format: MediaFormat, $sort: [MediaSort], $season: MediaSeason, $seasonYear: Int, $status: MediaStatus, $page: Int, $perPage: Int) {
-    Page (page: $page, perPage: $perPage) {
-      pageInfo {
-        total
-        currentPage
-        lastPage
-        hasNextPage
-      }
-      media (search: $search, genre_in: $genres, format: $format, sort: $sort, season: $season, seasonYear: $seasonYear, status: $status, type: ANIME) {
-        id
-        idMal
-        title {
-          romaji
-          english
-          native
-        }
-        coverImage {
-          large
-          extraLarge
-        }
-        bannerImage
-        averageScore
-        seasonYear
-        format
-        isAdult
-        status
-        episodes
-        genres
-        duration
-        description
-        startDate {
-          year
-          month
-          day
-        }
-      }
-    }
-  }
-`;
-
-const RECENT_EPISODES_QUERY = `
-  query ($page: Int, $perPage: Int, $now: Int) {
-    Page (page: $page, perPage: $perPage) {
-      pageInfo {
-        currentPage
-        lastPage
-      }
-      airingSchedules (airingAt_lesser: $now, sort: TIME_DESC) {
-        episode
-        media {
-          id
-          idMal
-          title {
-            romaji
-            english
-            native
-          }
-          coverImage {
-            large
-            extraLarge
-          }
-          bannerImage
-          averageScore
-          seasonYear
-          format
-          isAdult
-          status
-          episodes
-          genres
-          duration
-          description
-          startDate {
-            year
-            month
-            day
-          }
-        }
-      }
-    }
-  }
-`;
 
 // ─── HTTP Server ─────────────────────────────────────────────────────────────
 let lastBaseUrl = '';
@@ -969,64 +501,55 @@ const server = http.createServer(async (req, res) => {
   
   if (rails[path]) {
     try {
+      const page = parseInt(parsedUrl.searchParams.get('page'), 10) || 1;
+      const perPage = parseInt(parsedUrl.searchParams.get('per_page'), 10) || (path === '/api/recent' ? 16 : 12);
+      
+      let filteredDb = [...db];
+      
       if (path === '/api/recent') {
-        const page = parseInt(parsedUrl.searchParams.get('page'), 10) || 1;
-        const perPage = parseInt(parsedUrl.searchParams.get('per_page'), 10) || 16;
-        // Round to nearest 5-minute boundary so cache key stays stable
-        // (prevents each second producing a unique cache key that never hits)
-        const FIVE_MIN_SECS = 5 * 60;
-        const now = Math.floor(Date.now() / 1000 / FIVE_MIN_SECS) * FIVE_MIN_SECS;
-        const data = await fetchAniList(RECENT_EPISODES_QUERY, { page, perPage, now });
-        
-        const list = data?.Page?.airingSchedules?.map(sched => {
-          const item = mapAniListMedia(sched.media);
-          if (item) {
-            item.ep_num = sched.episode;
-          }
-          return item;
-        }).filter(Boolean) || [];
+        filteredDb = filteredDb.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+        const start = (page - 1) * perPage;
+        const sliced = filteredDb.slice(start, start + perPage);
+        const list = sliced.map(item => {
+          const mapped = mapAnikotoMedia(item);
+          mapped.ep_num = item.next_air_ep ? item.next_air_ep - 1 : null;
+          return mapped;
+        });
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: true,
           data: {
             results: list,
-            current_page: data?.Page?.pageInfo?.currentPage || page,
-            last_page: data?.Page?.pageInfo?.lastPage || 1
+            current_page: page,
+            last_page: Math.ceil(filteredDb.length / perPage) || 1
           }
         }));
+        return;
       } else {
-        let sort = ['TRENDING_DESC'];
-        let status = undefined;
-        let season = undefined;
-        let seasonYear = undefined;
-        
-        if (path === '/api/popular') {
-          sort = ['POPULARITY_DESC'];
-        } else if (path === '/api/top-rated') {
-          sort = ['SCORE_DESC'];
+        if (path === '/api/popular' || path === '/api/top-rated') {
+          filteredDb = filteredDb.sort((a, b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0));
         } else if (path === '/api/upcoming') {
-          sort = ['POPULARITY_DESC'];
-          status = 'NOT_YET_RELEASED';
+          filteredDb = filteredDb.filter(x => x.status === 'Not yet aired' || x.status === 'Not Yet Aired');
         } else if (path === '/api/season') {
-          const curSeason = getCurrentSeason();
-          sort = ['POPULARITY_DESC'];
-          season = curSeason.season;
-          seasonYear = curSeason.year;
+          const month = new Date().getMonth();
+          let currentSeason = 'winter';
+          if (month >= 2 && month <= 5) currentSeason = 'spring';
+          else if (month >= 6 && month <= 8) currentSeason = 'summer';
+          else if (month >= 9 && month <= 10) currentSeason = 'fall';
+          const currentYear = new Date().getFullYear();
+          filteredDb = filteredDb.filter(x => (x.season || '').toLowerCase() === currentSeason && x.year === currentYear);
+        } else {
+          filteredDb = filteredDb.sort((a, b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0));
         }
         
-        const data = await fetchAniList(ANIME_LIST_QUERY, {
-          sort,
-          status,
-          season,
-          seasonYear,
-          page: 1,
-          perPage: 12
-        });
+        const start = (page - 1) * perPage;
+        const sliced = filteredDb.slice(start, start + perPage);
+        const list = sliced.map(mapAnikotoMedia);
         
-        const list = data?.Page?.media?.map(mapAniListMedia) || [];
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, data: list }));
+        return;
       }
     } catch (err) {
       console.error('[Error fetching rail:', path, ']', err.message);
@@ -1039,37 +562,34 @@ const server = http.createServer(async (req, res) => {
   // Search
   if (path === '/api/search') {
     try {
-      const q = parsedUrl.searchParams.get('q') || parsedUrl.searchParams.get('query') || '';
+      const q = (parsedUrl.searchParams.get('q') || parsedUrl.searchParams.get('query') || '').toLowerCase();
       const genresStr = parsedUrl.searchParams.get('genres') || '';
-      const format = parsedUrl.searchParams.get('format') || undefined;
-      const sortVal = parsedUrl.searchParams.get('sort') || 'POPULARITY_DESC';
       const page = parseInt(parsedUrl.searchParams.get('page'), 10) || 1;
+      const perPage = 24;
       
-      const genres = genresStr ? genresStr.split(',').map(g => g.trim()) : undefined;
+      const genres = genresStr ? genresStr.split(',').map(g => g.trim().toLowerCase()) : [];
       
-      // Map sort value
-      let sort = ['POPULARITY_DESC'];
-      if (sortVal === 'SCORE_DESC') sort = ['SCORE_DESC'];
-      else if (sortVal === 'TRENDING_DESC') sort = ['TRENDING_DESC'];
-      else if (sortVal === 'UPDATED_AT_DESC') sort = ['UPDATED_AT_DESC'];
-      else if (sortVal === 'START_DATE_DESC') sort = ['START_DATE_DESC'];
+      let filteredDb = db.filter(item => {
+        let match = true;
+        if (q) {
+          const t1 = (item.title || '').toLowerCase();
+          const t2 = (item.alternative || '').toLowerCase();
+          const t3 = (item.native || '').toLowerCase();
+          match = t1.includes(q) || t2.includes(q) || t3.includes(q);
+        }
+        if (match && genres.length > 0) {
+          const itemGenres = (item.terms_by_type?.genre || []).map(g => g.toLowerCase());
+          match = genres.every(g => itemGenres.includes(g));
+        }
+        return match;
+      });
       
-      const variables = {
-        search: q || undefined,
-        genres,
-        format: format || undefined,
-        sort,
-        page,
-        perPage: 24
-      };
-      
-      const data = await fetchAniList(ANIME_LIST_QUERY, variables);
-      const list = data?.Page?.media?.map(mapAniListMedia) || [];
+      const start = (page - 1) * perPage;
+      const list = filteredDb.slice(start, start + perPage).map(mapAnikotoMedia);
       
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, data: list }));
     } catch (err) {
-      console.error('[Search Error]:', err.message);
       res.writeHead(502, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, error: err.message }));
     }
@@ -1080,19 +600,18 @@ const server = http.createServer(async (req, res) => {
   const animeInfoMatch = path.match(/^\/api\/anime\/([^/]+)$/);
   if (animeInfoMatch) {
     try {
-      const id = parseInt(animeInfoMatch[1], 10);
-      const data = await fetchAniList(ANIME_DETAILS_QUERY, { id });
+      const id = animeInfoMatch[1];
+      const media = getMediaById(id);
       
-      if (!data?.Media) {
+      if (!media) {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Anime not found' }));
         return;
       }
       
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, data: mapAniListMedia(data.Media) }));
+      res.end(JSON.stringify({ success: true, data: mapAnikotoMedia(media) }));
     } catch (err) {
-      console.error('[Info Error]:', err.message);
       res.writeHead(502, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, error: err.message }));
     }
@@ -1109,7 +628,7 @@ const server = http.createServer(async (req, res) => {
         const mappingData = await zenshinRes.json();
         const rawEpisodes = mappingData.episodes || {};
         const episodesList = Object.values(rawEpisodes)
-          .filter(ep => ep.type === "Regular Episode" || ep.type === "Special")
+          .filter(ep => ep.type === 'Regular Episode' || ep.type === 'Special')
           .map(ep => ({
             id: ep.tvdbId || ep.anidbEid || ep.episode,
             ep_num: parseInt(ep.episode, 10) || ep.episode,
@@ -1130,30 +649,16 @@ const server = http.createServer(async (req, res) => {
         throw new Error(`Zenshin returned status ${zenshinRes.status}`);
       }
     } catch (err) {
-      console.warn(`[Episodes Warning] Failed to fetch episodes from Zenshin: ${err.message}. Using AniList fallback.`);
-      // Fallback to fetching AniList episodes count
       try {
-        const data = await fetchAniList(`
-          query ($id: Int) {
-            Media (id: $id) {
-              episodes
-              bannerImage
-              coverImage {
-                large
-              }
-            }
-          }
-        `, { id });
-        
-        const media = data?.Media;
-        const count = media?.episodes || 12; // Fallback to 12 if count is null
+        const media = getMediaById(id);
+        const count = media ? parseInt(media.episodes, 10) || 12 : 12;
         const fallbackList = [];
         for (let i = 1; i <= count; i++) {
           fallbackList.push({
             id: `fallback-${i}`,
             ep_num: i,
             name: `Episode ${i}`,
-            img: media?.bannerImage || media?.coverImage?.large || '',
+            img: media?.background_image || media?.poster || '',
             desc: 'Episode description is currently unavailable.',
             created_at: null
           });
@@ -1162,7 +667,6 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, data: fallbackList }));
       } catch (fallbackErr) {
-        console.error('[Episodes Error] Fallback failed:', fallbackErr.message);
         res.writeHead(502, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Failed to fetch episodes list' }));
       }
@@ -1298,6 +802,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Node-Animetsu-API CORS Proxy is listening on port ${PORT} at http://0.0.0.0:${PORT}`);
-  loadCache();
-  warmupCache();
+  loadDB();
+  
 });
