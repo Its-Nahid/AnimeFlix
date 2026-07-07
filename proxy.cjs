@@ -9,10 +9,10 @@ const fs = require('fs');
 const pathLib = require('path');
 
 const PORT = process.env.PORT || 8080;
-const UPSTREAM_BASE = 'https://animetsu.live/v2';
+const UPSTREAM_BASE = 'https://animetsu.cc/v2';
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-const REFERER = 'https://animetsu.live/';
-const ORIGIN = 'https://animetsu.live';
+const REFERER = 'https://animetsu.cc/';
+const ORIGIN = 'https://animetsu.cc';
 
 // In-memory key cache: keyUrl -> Buffer(16)
 const keyCache = {};
@@ -147,35 +147,25 @@ async function resolveAnimetsuId(anilistId) {
     }
 
     const titleLower = title.toLowerCase();
-    const sortedResults = results.sort((a, b) => {
-      const aMatch = (a.title?.romaji || '').toLowerCase() === titleLower ? 0 : 1;
-      const bMatch = (b.title?.romaji || '').toLowerCase() === titleLower ? 0 : 1;
-      return aMatch - bMatch;
-    });
+    
+    // Find best match by checking titles directly to bypass Cloudflare block on /info/
+    const bestMatch = results.find(r => 
+      (r.title?.romaji || '').toLowerCase() === titleLower ||
+      (r.title?.english || '').toLowerCase() === titleLower ||
+      (r.title?.native || '').toLowerCase() === titleLower ||
+      (r.title || '').toLowerCase() === titleLower
+    );
 
-    for (const result of sortedResults.slice(0, 5)) {
-      const infoUrl = `${UPSTREAM_BASE}/api/anime/info/${result.id}`;
-      const infoBuf = await curlFetchRaw(infoUrl);
-      let infoData;
-      try {
-        infoData = JSON.parse(infoBuf.toString('utf8'));
-      } catch (e) {
-        continue;
-      }
-
-      if (String(infoData?.anilist_id) === id) {
-        console.log(`[ID Resolve] Mapped AniList ${id} -> animetsu ${result.id} ('${title}')`);
-        _anilistToAnimetsuCache[id] = result.id;
-        return result.id;
-      }
+    if (bestMatch) {
+      console.log(`[ID Resolve] Mapped AniList ${id} -> animetsu ${bestMatch.id} ('${title}') via title match`);
+      _anilistToAnimetsuCache[id] = bestMatch.id;
+      return bestMatch.id;
     }
 
-    const fallback = results.find(r =>
-      (r.title?.romaji || '').toLowerCase() === titleLower ||
-      (r.title?.english || '').toLowerCase() === titleLower
-    );
+    // Fallback to the first result
+    const fallback = results[0];
     if (fallback) {
-      console.warn(`[ID Resolve] Fallback title match: AniList ${id} -> animetsu ${fallback.id} ('${title}')`);
+      console.warn(`[ID Resolve] Fallback match to first result: AniList ${id} -> animetsu ${fallback.id} ('${title}')`);
       _anilistToAnimetsuCache[id] = fallback.id;
       return fallback.id;
     }
@@ -203,7 +193,6 @@ function curlFetchRaw(targetUrl) {
       '-H', `User-Agent: ${USER_AGENT}`,
       '-H', `Referer: ${REFERER}`,
       '-H', `Origin: ${ORIGIN}`,
-      '--http2',
       targetUrl
     ];
     const curl = spawn('curl', args);
@@ -240,8 +229,7 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
     '-s', '-i', '-N',
     '-H', `User-Agent: ${USER_AGENT}`,
     '-H', `Referer: ${REFERER}`,
-    '-H', `Origin: ${ORIGIN}`,
-    '--http2'
+    '-H', `Origin: ${ORIGIN}`
   ];
   if (incomingHeaders['range']) args.push('-H', `Range: ${incomingHeaders['range']}`);
   args.push(target);
