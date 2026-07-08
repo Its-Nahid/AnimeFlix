@@ -4,7 +4,7 @@ import Hls from "hls.js";
 import axios from "axios";
 import AnimeCard from "../components/AnimeCard";
 import Navbar from "../components/Navbar";
-import { API_BASE_URL, ENDPOINTS, proxyImage, fetchZenshinEpisodes } from "../config";
+import { API_BASE_URL, ENDPOINTS, proxyImage, fetchZenshinEpisodes, getWatchedEpisodes, markEpisodeWatched } from "../config";
 
 function WatchPage() {
   const { id, ep } = useParams();
@@ -30,7 +30,32 @@ function WatchPage() {
   // HLS quality level state
   const [hlsLevels, setHlsLevels] = useState([]);
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
-  const [showQualityMenu, setShowQualityMenu] = useState(false);
+
+  // Which in-player menu is open: 'settings' | 'subtitle' | 'audio' | null
+  const [openMenu, setOpenMenu] = useState(null);
+  // Settings submenu view: 'root' | 'quality' | 'speed' | 'server'
+  const [settingsView, setSettingsView] = useState("root");
+
+  // Subtitle track state (-1 = off)
+  const [subtitleTracks, setSubtitleTracks] = useState([]);
+  const [activeSubtitle, setActiveSubtitle] = useState(-1);
+
+  // Custom player transport state
+  const containerRef = useRef(null);
+  const controlsTimeoutRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [buffered, setBuffered] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(true);
+
+  // Watched-episode tracking
+  const [watchedEps, setWatchedEps] = useState(() => getWatchedEpisodes(id));
+  const watchedMarkedRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -124,6 +149,16 @@ function WatchPage() {
           setWatchData(data);
           watchDataRef.current = data;
           setSelectedQuality(data.sources[0].proxy_url);
+
+          // Prepare subtitle tracks; default to first (or the flagged default)
+          const subs = Array.isArray(data.subtitles) ? data.subtitles : [];
+          setSubtitleTracks(subs);
+          if (subs.length > 0) {
+            const defIdx = subs.findIndex(s => s.default);
+            setActiveSubtitle(defIdx >= 0 ? defIdx : 0);
+          } else {
+            setActiveSubtitle(-1);
+          }
         }
       } catch (err) {
         console.error("Error loading stream sources:", err);
@@ -135,6 +170,156 @@ function WatchPage() {
     fetchStreamSources();
     return () => { isMounted = false; };
   }, [id, ep, selectedServer, sourceType]);
+
+  // Scroll to top whenever the episode changes (fixes landing mid-page)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [id, ep]);
+
+  // Reset the per-episode "already marked watched" guard on episode change.
+  useEffect(() => {
+    watchedMarkedRef.current = false;
+  }, [id, ep]);
+
+  // Mark an episode watched once the viewer has seen ≥30% of it.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !ep) return;
+    const onTimeUpdate = () => {
+      if (watchedMarkedRef.current) return;
+      if (video.duration && video.currentTime / video.duration >= 0.3) {
+        watchedMarkedRef.current = true;
+        markEpisodeWatched(id, ep);
+        setWatchedEps(getWatchedEpisodes(id));
+      }
+    };
+    video.addEventListener("timeupdate", onTimeUpdate);
+    return () => video.removeEventListener("timeupdate", onTimeUpdate);
+  }, [id, ep, watchData]);
+
+  // Apply the selected subtitle track to the video's native text tracks
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const tracks = video.textTracks;
+    for (let i = 0; i < tracks.length; i++) {
+      tracks[i].mode = i === activeSubtitle ? "showing" : "hidden";
+    }
+  }, [activeSubtitle, watchData, playerLoading]);
+
+  // ─── Custom player transport wiring ───────────────────────────────────────
+  // Sync React state with the <video> element's events.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || playerLoading || playerError) return;
+
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onTime = () => setCurrentTime(video.currentTime);
+    const onDuration = () => setDuration(video.duration || 0);
+    const onVolume = () => { setVolume(video.volume); setMuted(video.muted); };
+    const onRate = () => setPlaybackRate(video.playbackRate);
+    const onProgress = () => {
+      try {
+        if (video.buffered.length) {
+          setBuffered(video.buffered.end(video.buffered.length - 1));
+        }
+      } catch {}
+    };
+
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("timeupdate", onTime);
+    video.addEventListener("durationchange", onDuration);
+    video.addEventListener("loadedmetadata", onDuration);
+    video.addEventListener("volumechange", onVolume);
+    video.addEventListener("ratechange", onRate);
+    video.addEventListener("progress", onProgress);
+    return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("timeupdate", onTime);
+      video.removeEventListener("durationchange", onDuration);
+      video.removeEventListener("loadedmetadata", onDuration);
+      video.removeEventListener("volumechange", onVolume);
+      video.removeEventListener("ratechange", onRate);
+      video.removeEventListener("progress", onProgress);
+    };
+  }, [playerLoading, playerError, watchData]);
+
+  // Track fullscreen changes (from button or Esc key)
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) video.play().catch(() => {}); else video.pause();
+  };
+
+  const seek = (e) => {
+    const video = videoRef.current;
+    if (!video || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    video.currentTime = ratio * duration;
+    setCurrentTime(ratio * duration);
+  };
+
+  const skip = (secs) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = Math.min(duration || Infinity, Math.max(0, video.currentTime + secs));
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+  };
+
+  const changeVolume = (v) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = v;
+    video.muted = v === 0;
+  };
+
+  const setRate = (r) => {
+    const video = videoRef.current;
+    if (video) video.playbackRate = r;
+  };
+
+  const toggleFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) el.requestFullscreen?.().catch(() => {});
+    else document.exitFullscreen?.();
+  };
+
+  const fmtTime = (t) => {
+    if (!t || isNaN(t)) return "0:00";
+    const h = Math.floor(t / 3600);
+    const m = Math.floor((t % 3600) / 60);
+    const s = Math.floor(t % 60);
+    return h > 0
+      ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      : `${m}:${String(s).padStart(2, "0")}`;
+  };
+
+  // Auto-hide controls after inactivity while playing
+  const revealControls = () => {
+    setControlsVisible(true);
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (!videoRef.current?.paused && !openMenu) setControlsVisible(false);
+    }, 3000);
+  };
+
+  useEffect(() => () => { if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current); }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -231,78 +416,34 @@ function WatchPage() {
             <span className="ep-sidebar-range">{episodes.length > 0 ? `001-${String(episodes.length).padStart(3, '0')}` : '—'}</span>
           </div>
           <div className="ep-sidebar-list">
-            {episodes.map(episode => (
-              <div 
-                key={episode.id} 
-                className={`ep-sidebar-item ${episode.ep_num.toString() === ep ? "active" : ""}`}
-                onClick={() => navigate(`/anime/${id}/watch/${episode.ep_num}`)}
-              >
-                <span className="ep-sidebar-num">{episode.ep_num}</span>
-                <span className="ep-sidebar-name">{episode.name || `Episode ${episode.ep_num}`}</span>
-                {episode.ep_num.toString() === ep && <span className="ep-sidebar-playing">▶</span>}
-              </div>
-            ))}
+            {episodes.map(episode => {
+              const isActive = episode.ep_num.toString() === ep;
+              const isWatched = watchedEps.has(String(episode.ep_num));
+              return (
+                <div
+                  key={episode.id}
+                  className={`ep-sidebar-item ${isActive ? "active" : ""} ${isWatched && !isActive ? "watched" : ""}`}
+                  onClick={() => navigate(`/anime/${id}/watch/${episode.ep_num}`)}
+                >
+                  <span className="ep-sidebar-num">{episode.ep_num}</span>
+                  <span className="ep-sidebar-name">{episode.name || `Episode ${episode.ep_num}`}</span>
+                  {isActive
+                    ? <span className="ep-sidebar-playing">▶</span>
+                    : isWatched && <span className="ep-sidebar-watched-check" title="Watched">✓</span>}
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* CENTER COLUMN: PLAYER + INFO */}
         <div className="watch-center-col">
-          <div className="video-wrapper" onClick={() => showQualityMenu && setShowQualityMenu(false)}>
-            <div className="server-status-badge">
-              <span className="status-dot"></span>
-              Auto • {selectedServer}
-            </div>
-
-            {/* Quality Selector */}
-            {hlsLevels.length > 1 && (
-              <div className="quality-selector">
-                <button 
-                  className="quality-btn" 
-                  onClick={(e) => { e.stopPropagation(); setShowQualityMenu(!showQualityMenu); }}
-                  title="Quality"
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                  </svg>
-                  <span className="quality-current-label">
-                    {currentLevel === -1 ? 'Auto' : hlsLevels.find(l => l.index === currentLevel)?.label || 'Auto'}
-                  </span>
-                </button>
-                {showQualityMenu && (
-                  <div className="quality-menu" onClick={(e) => e.stopPropagation()}>
-                    <div className="quality-menu-title">Quality</div>
-                    <div 
-                      className={`quality-option ${currentLevel === -1 ? 'active' : ''}`}
-                      onClick={() => {
-                        if (hlsRef.current) hlsRef.current.currentLevel = -1;
-                        setCurrentLevel(-1);
-                        setShowQualityMenu(false);
-                      }}
-                    >
-                      <span>Auto</span>
-                      {currentLevel === -1 && <span className="quality-check">✓</span>}
-                    </div>
-                    {[...hlsLevels].sort((a, b) => b.height - a.height).map(level => (
-                      <div 
-                        key={level.index}
-                        className={`quality-option ${currentLevel === level.index ? 'active' : ''}`}
-                        onClick={() => {
-                          if (hlsRef.current) hlsRef.current.currentLevel = level.index;
-                          setCurrentLevel(level.index);
-                          setShowQualityMenu(false);
-                        }}
-                      >
-                        <span>{level.label}</span>
-                        {level.height >= 1080 && <span className="quality-hd-badge">HD</span>}
-                        {currentLevel === level.index && <span className="quality-check">✓</span>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
+          <div
+            ref={containerRef}
+            className={`video-wrapper ${controlsVisible || !isPlaying ? "controls-on" : "controls-off"}`}
+            onMouseMove={revealControls}
+            onMouseLeave={() => { if (isPlaying && !openMenu) setControlsVisible(false); }}
+          >
             {playerLoading ? (
               <div className="player-loading">
                 <div className="spinner"></div>
@@ -310,35 +451,224 @@ function WatchPage() {
             ) : playerError ? (
               <div className="player-error">{playerError}</div>
             ) : (
-              <video ref={videoRef} controls crossOrigin="anonymous" className="html-video">
-                {watchData?.subtitles?.map((sub, idx) => (
-                  <track key={idx} kind="subtitles" src={sub.url} label={sub.label} srcLang={sub.lang || "en"} default={sub.default} />
-                ))}
-              </video>
+              <>
+                <video
+                  ref={videoRef}
+                  crossOrigin="anonymous"
+                  className="html-video"
+                  onClick={() => { if (openMenu) setOpenMenu(null); else togglePlay(); }}
+                  onDoubleClick={toggleFullscreen}
+                >
+                  {subtitleTracks.map((sub, idx) => (
+                    <track key={idx} kind="subtitles" src={sub.url} label={sub.label} srcLang={sub.lang || "en"} />
+                  ))}
+                </video>
+
+                {/* Center play/pause tap indicator (shows while paused) */}
+                {!isPlaying && (
+                  <button className="vp-center-play" onClick={togglePlay} aria-label="Play">
+                    <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                  </button>
+                )}
+
+                {/* ─── Custom bottom control bar ─── */}
+                <div className="vp-controls" onClick={(e) => e.stopPropagation()}>
+                  {/* Scrubber */}
+                  <div className="vp-scrubber" onClick={seek}>
+                    <div className="vp-scrubber-buffered" style={{ width: `${duration ? (buffered / duration) * 100 : 0}%` }} />
+                    <div className="vp-scrubber-played" style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}>
+                      <span className="vp-scrubber-knob" />
+                    </div>
+                  </div>
+
+                  <div className="vp-buttons">
+                    {/* Left cluster */}
+                    <div className="vp-left">
+                      <button className="vp-btn" onClick={togglePlay} title={isPlaying ? "Pause" : "Play"}>
+                        {isPlaying ? (
+                          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                        )}
+                      </button>
+                      <button className="vp-btn" onClick={() => skip(-10)} title="Rewind 10s">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4 3 12l8 8" /><path d="M21 12H4" />
+                        </svg>
+                      </button>
+                      <button className="vp-btn" onClick={() => skip(10)} title="Forward 10s">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M13 4l8 8-8 8" /><path d="M3 12h17" />
+                        </svg>
+                      </button>
+
+                      <div className="vp-volume">
+                        <button className="vp-btn" onClick={toggleMute} title={muted ? "Unmute" : "Mute"}>
+                          {muted || volume === 0 ? (
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 5 6 9H2v6h4l5 4z" /><path d="m22 9-6 6" /><path d="m16 9 6 6" />
+                            </svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 5 6 9H2v6h4l5 4z" />{volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />}<path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            </svg>
+                          )}
+                        </button>
+                        <input
+                          className="vp-volume-slider"
+                          type="range" min="0" max="1" step="0.05"
+                          value={muted ? 0 : volume}
+                          onChange={(e) => changeVolume(parseFloat(e.target.value))}
+                        />
+                      </div>
+
+                      <span className="vp-time">{fmtTime(currentTime)} <span className="vp-time-sep">/</span> {fmtTime(duration)}</span>
+                    </div>
+
+                    {/* Right cluster */}
+                    <div className="vp-right">
+                      {/* Subtitles / CC */}
+                      {subtitleTracks.length > 0 && (
+                        <div className="vp-menu-wrap">
+                          <button
+                            className={`vp-btn ${activeSubtitle >= 0 ? "active" : ""}`}
+                            onClick={() => setOpenMenu(openMenu === "subtitle" ? null : "subtitle")}
+                            title="Subtitles"
+                          >
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M6 12h4" /><path d="M14 12h4" /><path d="M6 15h2" /><path d="M12 15h6" />
+                            </svg>
+                          </button>
+                          {openMenu === "subtitle" && (
+                            <div className="vp-menu">
+                              <div className="vp-menu-title">Subtitles</div>
+                              <div className={`vp-menu-option ${activeSubtitle === -1 ? "active" : ""}`} onClick={() => { setActiveSubtitle(-1); setOpenMenu(null); }}>
+                                <span>Off</span>{activeSubtitle === -1 && <span className="vp-menu-check">✓</span>}
+                              </div>
+                              {subtitleTracks.map((sub, idx) => (
+                                <div key={idx} className={`vp-menu-option ${activeSubtitle === idx ? "active" : ""}`} onClick={() => { setActiveSubtitle(idx); setOpenMenu(null); }}>
+                                  <span>{sub.label || sub.lang || `Track ${idx + 1}`}</span>
+                                  {activeSubtitle === idx && <span className="vp-menu-check">✓</span>}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Settings: Quality / Speed / Server */}
+                      <div className="vp-menu-wrap">
+                        <button
+                          className={`vp-btn ${openMenu === "settings" ? "active" : ""}`}
+                          onClick={() => { setOpenMenu(openMenu === "settings" ? null : "settings"); setSettingsView("root"); }}
+                          title="Settings"
+                        >
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                          </svg>
+                        </button>
+                        {openMenu === "settings" && (
+                          <div className="vp-menu">
+                            {settingsView === "root" && (
+                              <>
+                                <div className="vp-menu-row" onClick={() => setSettingsView("quality")}>
+                                  <span>Quality</span>
+                                  <span className="vp-menu-value">{currentLevel === -1 ? "Auto" : (hlsLevels.find(l => l.index === currentLevel)?.label || "Auto")} ›</span>
+                                </div>
+                                <div className="vp-menu-row" onClick={() => setSettingsView("speed")}>
+                                  <span>Speed</span>
+                                  <span className="vp-menu-value">{playbackRate === 1 ? "Normal" : `${playbackRate}x`} ›</span>
+                                </div>
+                                <div className="vp-menu-row" onClick={() => setSettingsView("server")}>
+                                  <span>Server</span>
+                                  <span className="vp-menu-value" style={{ textTransform: "capitalize" }}>{selectedServer} ›</span>
+                                </div>
+                              </>
+                            )}
+
+                            {settingsView === "quality" && (
+                              <>
+                                <div className="vp-menu-back" onClick={() => setSettingsView("root")}>‹ Quality</div>
+                                <div className={`vp-menu-option ${currentLevel === -1 ? "active" : ""}`} onClick={() => { if (hlsRef.current) hlsRef.current.currentLevel = -1; setCurrentLevel(-1); }}>
+                                  <span>Auto</span>{currentLevel === -1 && <span className="vp-menu-check">✓</span>}
+                                </div>
+                                {hlsLevels.length > 1 ? (
+                                  [...hlsLevels].sort((a, b) => b.height - a.height).map(level => (
+                                    <div key={level.index} className={`vp-menu-option ${currentLevel === level.index ? "active" : ""}`} onClick={() => { if (hlsRef.current) hlsRef.current.currentLevel = level.index; setCurrentLevel(level.index); }}>
+                                      <span>{level.label}</span>
+                                      {level.height >= 1080 && <span className="vp-hd-badge">HD</span>}
+                                      {currentLevel === level.index && <span className="vp-menu-check">✓</span>}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="vp-menu-option disabled"><span>Auto only</span></div>
+                                )}
+                              </>
+                            )}
+
+                            {settingsView === "speed" && (
+                              <>
+                                <div className="vp-menu-back" onClick={() => setSettingsView("root")}>‹ Speed</div>
+                                {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+                                  <div key={rate} className={`vp-menu-option ${playbackRate === rate ? "active" : ""}`} onClick={() => { setRate(rate); }}>
+                                    <span>{rate === 1 ? "Normal" : `${rate}x`}</span>
+                                    {playbackRate === rate && <span className="vp-menu-check">✓</span>}
+                                  </div>
+                                ))}
+                              </>
+                            )}
+
+                            {settingsView === "server" && (
+                              <>
+                                <div className="vp-menu-back" onClick={() => setSettingsView("root")}>‹ Server</div>
+                                {["auto", "kite", "dio"].map(srv => (
+                                  <div key={srv} className={`vp-menu-option ${selectedServer === srv ? "active" : ""}`} onClick={() => { setSelectedServer(srv); setOpenMenu(null); }}>
+                                    <span style={{ textTransform: "capitalize" }}>{srv === "auto" ? "⚡ Auto" : srv}</span>
+                                    {selectedServer === srv && <span className="vp-menu-check">✓</span>}
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <button className="vp-btn" onClick={toggleFullscreen} title="Fullscreen">
+                        {isFullscreen ? (
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3" />
+                          </svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
           {/* Server Controls Row */}
           <div className="watch-server-row">
             <div className="watch-server-group">
-              <span className="watch-server-type-label">SUB</span>
+              <span className="watch-server-type-label">SERVER</span>
               <div className="watch-server-btns">
                 <button className={`watch-srv-btn ${selectedServer === "auto" ? "active" : ""}`} onClick={() => setSelectedServer("auto")}>⚡ Auto</button>
                 <button className={`watch-srv-btn ${selectedServer === "kite" ? "active" : ""}`} onClick={() => setSelectedServer("kite")}>Kite</button>
                 <button className={`watch-srv-btn ${selectedServer === "dio" ? "active" : ""}`} onClick={() => setSelectedServer("dio")}>Dio</button>
-                <button className={`watch-srv-btn ${selectedServer === "kiss" ? "active" : ""}`} onClick={() => setSelectedServer("kiss")}>Kiss</button>
-                <button className={`watch-srv-btn ${selectedServer === "meg" ? "active" : ""}`} onClick={() => setSelectedServer("meg")}>Meg</button>
-                <button className={`watch-srv-btn ${selectedServer === "pahe" ? "active" : ""}`} onClick={() => setSelectedServer("pahe")}>Pahe</button>
               </div>
             </div>
-            {!checkingDub && hasDub && (
-              <div className="watch-server-group">
-                <span className="watch-server-type-label">DUB</span>
-                <div className="watch-server-btns">
-                  <button className={`watch-srv-btn ${sourceType === "dub" ? "active" : ""}`} onClick={() => setSourceType("dub")}>🎤 DUB</button>
-                </div>
+            <div className="watch-server-group">
+              <span className="watch-server-type-label">AUDIO</span>
+              <div className="watch-server-btns">
+                <button className={`watch-srv-btn ${sourceType === "sub" ? "active" : ""}`} onClick={() => setSourceType("sub")}>🇯🇵 Sub</button>
+                <button className={`watch-srv-btn ${sourceType === "dub" ? "active" : ""}`} onClick={() => setSourceType("dub")}>🎤 Dub</button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Episode Info Notice */}
@@ -364,9 +694,11 @@ function WatchPage() {
               <p className="watch-anime-desc" dangerouslySetInnerHTML={{ __html: anime.description }}></p>
               <div className="watch-anime-meta-grid">
                 <div className="meta-item"><span className="meta-label">Type:</span> <span className="meta-value">{anime.type || 'TV'}</span></div>
-                <div className="meta-item"><span className="meta-label">Episodes:</span> <span className="meta-value">{anime.total_episodes || episodes.length}</span></div>
+                <div className="meta-item"><span className="meta-label">Episodes:</span> <span className="meta-value">{anime.total_eps || anime.total_episodes || episodes.length}</span></div>
+                {anime.sub_count !== null && anime.sub_count !== undefined && <div className="meta-item"><span className="meta-label">Sub:</span> <span className="meta-value">{anime.sub_count}</span></div>}
+                {anime.dub_count !== null && anime.dub_count !== undefined && <div className="meta-item"><span className="meta-label">Dub:</span> <span className="meta-value">{anime.dub_count}</span></div>}
                 <div className="meta-item"><span className="meta-label">Status:</span> <span className="meta-value">{anime.status || 'Unknown'}</span></div>
-                <div className="meta-item"><span className="meta-label">Duration:</span> <span className="meta-value">{anime.duration || '24 min'}</span></div>
+                <div className="meta-item"><span className="meta-label">Duration:</span> <span className="meta-value">{anime.duration ? `${anime.duration} min` : '24 min'}</span></div>
                 {anime.genres && anime.genres.length > 0 && (
                   <div className="meta-item full-width"><span className="meta-label">Genres:</span> <span className="meta-value">{anime.genres.join(', ')}</span></div>
                 )}

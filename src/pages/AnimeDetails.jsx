@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { ENDPOINTS, proxyImage, fetchZenshinEpisodes } from "../config";
+import { ENDPOINTS, proxyImage, fetchZenshinEpisodes, getWatchedEpisodes } from "../config";
 
 function AnimeDetail() {
   const { id } = useParams();
@@ -15,6 +15,24 @@ function AnimeDetail() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("episodes");
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  const [watchedEps, setWatchedEps] = useState(() => getWatchedEpisodes(id));
+
+  // Refresh watched set when returning to this page (e.g. after watching)
+  useEffect(() => {
+    const refresh = () => setWatchedEps(getWatchedEpisodes(id));
+    refresh();
+    window.addEventListener("watched-updated", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("watched-updated", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [id]);
+
+  // Land at the top when navigating to a new anime
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [id]);
 
   // Fetch anime info & episodes
   useEffect(() => {
@@ -151,6 +169,8 @@ function AnimeDetail() {
               <div className="title-meta-new">
                 {anime.format && <span className="meta-tag format">{anime.format}</span>}
                 {anime.total_eps && <span className="meta-tag">{anime.total_eps} episodes</span>}
+                {anime.sub_count !== null && <span className="meta-tag sub-tag">Sub: {anime.sub_count}</span>}
+                {anime.dub_count !== null && <span className="meta-tag dub-tag">Dub: {anime.dub_count}</span>}
                 {anime.status && <span className="meta-tag status">[{anime.status}]</span>}
                 {anime.start_date && <span className="meta-tag">{anime.start_date}</span>}
                 {anime.season && <span className="meta-tag season">{anime.season} {anime.year}</span>}
@@ -195,22 +215,29 @@ function AnimeDetail() {
           {activeTab === "episodes" && (
             <div className="tab-content episodes-tab-new">
               <div className="ep-grid-new">
-                {episodes.map(ep => (
-                  <div 
-                    key={ep.id} 
-                    className="ep-card-new"
+                {episodes.map(ep => {
+                  const watched = watchedEps.has(String(ep.ep_num));
+                  return (
+                  <div
+                    key={ep.id}
+                    className={`ep-card-new ${watched ? "watched" : ""}`}
                     onClick={() => navigate(`/anime/${id}/watch/${ep.ep_num}`)}
                   >
                     <div className="ep-thumb">
-                      <img 
-                        src={proxyImage(ep.img, banner)} 
-                        alt={ep.name || `Episode ${ep.ep_num}`} 
+                      <img
+                        src={proxyImage(ep.img, banner)}
+                        alt={ep.name || `Episode ${ep.ep_num}`}
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = banner;
                         }}
                       />
                       <div className="ep-badge">EP {ep.ep_num}</div>
+                      {watched && (
+                        <div className="ep-watched-overlay">
+                          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                      )}
                     </div>
                     <div className="ep-info">
                       <h4>{ep.name || `Episode ${ep.ep_num}`}</h4>
@@ -220,53 +247,98 @@ function AnimeDetail() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
           
           {activeTab === "characters" && (
             <div className="tab-content chars-tab-new mt-3">
-              <div className="chars-grid">
-                {anime.characters?.map((char, i) => (
-                  <div key={i} className="char-card">
-                    <img src={proxyImage(char.image)} alt={char.name} className="char-img" />
-                    <div className="char-info">
-                      <div className="char-name">{char.name}</div>
-                      <div className="char-role">{char.role}</div>
+              {anime.characters?.length > 0 ? (
+                <div className="chars-grid">
+                  {anime.characters.map((char, i) => (
+                    <div key={i} className="char-card">
+                      <img src={proxyImage(char.image)} alt={char.name} className="char-img" referrerPolicy="no-referrer" loading="lazy" />
+                      <div className="char-info">
+                        <div className="char-name">{char.name}</div>
+                        <div className="char-role">{char.role}</div>
+                      </div>
+                      {char.voice_actor && (
+                        <div className="char-va" title={`VA: ${char.voice_actor}`}>
+                          <span className="char-va-name">{char.voice_actor}</span>
+                          {char.voice_actor_image && (
+                            <img src={proxyImage(char.voice_actor_image)} alt={char.voice_actor} className="char-va-img" referrerPolicy="no-referrer" loading="lazy" />
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="tab-empty">No character information available.</p>
+              )}
             </div>
           )}
 
           {activeTab === "staff" && (
             <div className="tab-content chars-tab-new mt-3">
-              <div className="chars-grid">
-                {anime.staff?.map((s, i) => (
-                  <div key={i} className="char-card">
-                    <img src={proxyImage(s.image)} alt={s.name} className="char-img" />
-                    <div className="char-info">
-                      <div className="char-name">{s.name}</div>
-                      <div className="char-role">{s.role}</div>
+              {anime.staff?.length > 0 ? (
+                <div className="chars-grid">
+                  {anime.staff.map((s, i) => (
+                    <div key={i} className="char-card">
+                      <img src={proxyImage(s.image)} alt={s.name} className="char-img" referrerPolicy="no-referrer" loading="lazy" />
+                      <div className="char-info">
+                        <div className="char-name">{s.name}</div>
+                        <div className="char-role">{s.role}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="tab-empty">No staff information available.</p>
+              )}
             </div>
           )}
 
           {activeTab === "related" && (
             <div className="tab-content related-tab-new mt-3">
-              <div className="related-grid">
-                {anime.recommendations?.map((rec, i) => (
-                  <div key={i} className="poster-card" style={{cursor: 'pointer'}} onClick={() => navigate(`/anime/${rec.id}`)}>
-                    <img src={proxyImage(rec.cover_image?.large)} alt={rec.title?.english || rec.title?.romaji} />
-                    <div style={{padding: '8px', fontSize: '0.85rem', color: '#fff'}}>{rec.title?.english || rec.title?.romaji}</div>
+              {anime.relations?.length > 0 && (
+                <>
+                  <h3 className="related-section-title">Relations</h3>
+                  <div className="related-grid">
+                    {anime.relations.map((rel, i) => (
+                      <div key={`rel-${i}`} className="poster-card" style={{cursor: 'pointer'}} onClick={() => navigate(`/anime/${rel.id}`)}>
+                        <div className="poster-card-img">
+                          <img src={proxyImage(rel.cover_image?.large)} alt={rel.title?.english || rel.title?.romaji} referrerPolicy="no-referrer" loading="lazy" />
+                          <span className="poster-card-badge">{(rel.relation_type || '').replace(/_/g, ' ')}</span>
+                        </div>
+                        <div className="poster-card-title">{rel.title?.english || rel.title?.romaji}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
+
+              {anime.recommendations?.length > 0 && (
+                <>
+                  <h3 className="related-section-title">Recommended</h3>
+                  <div className="related-grid">
+                    {anime.recommendations.map((rec, i) => (
+                      <div key={`rec-${i}`} className="poster-card" style={{cursor: 'pointer'}} onClick={() => navigate(`/anime/${rec.id}`)}>
+                        <div className="poster-card-img">
+                          <img src={proxyImage(rec.cover_image?.large)} alt={rec.title?.english || rec.title?.romaji} referrerPolicy="no-referrer" loading="lazy" />
+                        </div>
+                        <div className="poster-card-title">{rec.title?.english || rec.title?.romaji}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {!anime.relations?.length && !anime.recommendations?.length && (
+                <p className="tab-empty">No related anime available.</p>
+              )}
             </div>
           )}
 

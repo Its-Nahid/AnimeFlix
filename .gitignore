@@ -33,6 +33,9 @@ lerna-debug.log*
 segment.ts
 *.ts.bak
 
+# Derived AniList enrichment cache (rebuilt at runtime from AniList API)
+anilist_cache.json
+
 # Temporary API backend source (separate repo)
 temp-api/
 
@@ -40,6 +43,7 @@ temp-api/
 .vscode/*
 !.vscode/extensions.json
 .idea
+.claude
 *.suo
 *.ntvs*
 *.njsproj

@@ -28,7 +28,34 @@ const BANNER_MAP = {
 
 function Hero({ animeList, onWatchClick }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(null);
   const timerRef = useRef(null);
+  const fadeTimerRef = useRef(null);
+
+  // Helper to resolve banner for a given anime
+  const resolveBanner = (anime) => {
+    if (!anime) return null;
+    const eTL = anime.title?.english?.toLowerCase() || "";
+    const rTL = anime.title?.romaji?.toLowerCase() || "";
+    for (const [key, url] of Object.entries(BANNER_MAP)) {
+      if (eTL.includes(key) || rTL.includes(key)) return url;
+    }
+    return anime.banner || anime.cover_image?.large || anime.cover_image?.medium || "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200&auto=format&fit=crop";
+  };
+
+  // Wrap setCurrentIndex to track the previous index for cross-fade
+  const changeSlide = (newIndexFn) => {
+    setCurrentIndex((prev) => {
+      const next = typeof newIndexFn === 'function' ? newIndexFn(prev) : newIndexFn;
+      if (next !== prev) {
+        setPrevIndex(prev);
+        // Clear previous slide after transition completes
+        if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+        fadeTimerRef.current = setTimeout(() => setPrevIndex(null), 900);
+      }
+      return next;
+    });
+  };
 
   // Auto-rotation every 10 seconds
   useEffect(() => {
@@ -36,7 +63,7 @@ function Hero({ animeList, onWatchClick }) {
 
     const startTimer = () => {
       timerRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % animeList.length);
+        changeSlide((prev) => (prev + 1) % animeList.length);
       }, 10000);
     };
 
@@ -44,6 +71,7 @@ function Hero({ animeList, onWatchClick }) {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [animeList]);
 
@@ -52,7 +80,7 @@ function Hero({ animeList, onWatchClick }) {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % animeList.length);
+        changeSlide((prev) => (prev + 1) % animeList.length);
       }, 10000);
     }
   };
@@ -60,19 +88,19 @@ function Hero({ animeList, onWatchClick }) {
   const handlePrev = (e) => {
     e.stopPropagation();
     resetTimer();
-    setCurrentIndex((prev) => (prev === 0 ? animeList.length - 1 : prev - 1));
+    changeSlide((prev) => (prev === 0 ? animeList.length - 1 : prev - 1));
   };
 
   const handleNext = (e) => {
     e.stopPropagation();
     resetTimer();
-    setCurrentIndex((prev) => (prev + 1) % animeList.length);
+    changeSlide((prev) => (prev + 1) % animeList.length);
   };
 
   const handleIndicatorClick = (idx, e) => {
     e.stopPropagation();
     resetTimer();
-    setCurrentIndex(idx);
+    changeSlide(idx);
   };
 
   if (!animeList || animeList.length === 0) {
@@ -90,7 +118,7 @@ function Hero({ animeList, onWatchClick }) {
 
   const anime = animeList[currentIndex];
   const title = anime.title?.english || anime.title?.romaji || (typeof anime.title === "string" ? anime.title : "Featured Anime");
-  
+
   // Resolve clear logo dynamically by checking title matching
   let logoUrl = anime.clear_logo || null;
   const englishTitleLower = anime.title?.english?.toLowerCase() || "";
@@ -104,16 +132,9 @@ function Hero({ animeList, onWatchClick }) {
     }
   }
 
-  // Resolve custom banner background image
-  let customBanner = null;
-  for (const [key, url] of Object.entries(BANNER_MAP)) {
-    if (englishTitleLower.includes(key) || romajiTitleLower.includes(key)) {
-      customBanner = url;
-      break;
-    }
-  }
-
-  const banner = customBanner || anime.banner || anime.cover_image?.large || anime.cover_image?.medium || "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200&auto=format&fit=crop";
+  // Resolve current and previous banners via helper
+  const banner = resolveBanner(anime);
+  const prevBanner = prevIndex !== null ? resolveBanner(animeList[prevIndex]) : null;
   const desc = anime.description || "No synopsis available.";
   const genres = anime.genres || [];
 
@@ -129,21 +150,31 @@ function Hero({ animeList, onWatchClick }) {
 
   return (
     <div className="hero">
-      {/* Cinematic Background Slide */}
-      <div 
+      {/* Previous backdrop (fading out underneath) */}
+      {prevBanner && (
+        <div
+          key={`bg-prev-${prevIndex}`}
+          className="hero-backdrop-slide hero-backdrop-out"
+          style={{
+            backgroundImage: `linear-gradient(to top, #141414 2%, rgba(20, 20, 20, 0.95) 15%, rgba(20, 20, 20, 0.5) 50%, rgba(20, 20, 20, 0.7) 100%), url(${prevBanner})`,
+          }}
+        />
+      )}
+      {/* Current backdrop (fading in on top) */}
+      <div
         key={`bg-${currentIndex}`}
         className="hero-backdrop-slide"
         style={{
-          backgroundImage: `linear-gradient(to top, #000000 5%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.8) 95%), url(${banner})`,
+          backgroundImage: `linear-gradient(to top, #141414 2%, rgba(20, 20, 20, 0.95) 15%, rgba(20, 20, 20, 0.5) 50%, rgba(20, 20, 20, 0.7) 100%), url(${banner})`,
         }}
       />
 
       {/* Left/Right manual arrows */}
       <button className="hero-carousel-arrow left" onClick={handlePrev} aria-label="Previous Slide">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
       </button>
       <button className="hero-carousel-arrow right" onClick={handleNext} aria-label="Next Slide">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
       </button>
 
       {/* Slide Text Content overlay with key change to re-trigger slide-up */}
@@ -155,14 +186,14 @@ function Hero({ animeList, onWatchClick }) {
             ))}
           </div>
         )}
-        
+
         {/* Dynamic Title / Logo display */}
         {logoUrl ? (
           <img src={logoUrl} alt={title} className="hero-logo" />
         ) : (
           <h1 className="hero-title">{title}</h1>
         )}
-        
+
         {/* Clean Metadata Layout (matches exact reference design) */}
         <div className="hero-clean-meta">
           <span className="hero-meta-item">{year}</span>
@@ -179,7 +210,7 @@ function Hero({ animeList, onWatchClick }) {
             </span>
           )}
           {status && <span className="hero-meta-status">{status}</span>}
-          
+
           {/* Mini Watch Now Button placed directly beside Airing status */}
           <button className="btn-play-mini" onClick={() => onWatchClick(anime)}>
             <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style={{ marginRight: '4px', verticalAlign: 'middle', marginTop: '-2px' }}><path d="M8 5v14l11-7z"></path></svg>
