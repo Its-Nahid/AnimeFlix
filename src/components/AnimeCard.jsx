@@ -32,17 +32,12 @@ function AnimeCard({ anime }) {
     }
   }
 
-  // 2. Determine dub count
-  let dubCount = anime.dub_count !== undefined && anime.dub_count !== null ? anime.dub_count : (anime.episodes?.dub || anime.dub);
-  if (dubCount === undefined || dubCount === null || dubCount === '') {
-    if (isRecent) {
-      dubCount = null;
-    } else if (anime.next_airing_ep) {
-      const subVal = typeof subCount === 'number' ? subCount : parseInt(subCount, 10);
-      dubCount = !isNaN(subVal) && subVal > 0 ? subVal : null; // Simuldub matches sub count exactly
-    } else {
-      dubCount = null;
-    }
+  // 2. Determine dub count — only ever from real data. Never assume a dub
+  // exists just because a show is airing (previously "simuldub matches sub"),
+  // which made sub-only titles falsely show a dub count.
+  let dubCount = anime.dub_count !== undefined && anime.dub_count !== null ? anime.dub_count : (anime.episodes?.dub ?? anime.dub);
+  if (dubCount === undefined || dubCount === '') {
+    dubCount = null;
   }
 
   // Formatting rating out of 10

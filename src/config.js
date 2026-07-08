@@ -32,6 +32,52 @@ export function proxyImage(imgPath, fallback = '') {
   return `${API_BASE_URL}/api/proxy/image?path=${encodeURIComponent(path)}`;
 }
 
+// ─── Watched-episode tracking (localStorage) ───────────────────────────────
+// Persists which episodes a user has watched so they can be grayed out.
+// Storage shape: { [animeId]: { [epNum]: true } }
+const WATCHED_KEY = 'animeflix_watched';
+
+function readWatched() {
+  try {
+    return JSON.parse(localStorage.getItem(WATCHED_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeWatched(data) {
+  try {
+    localStorage.setItem(WATCHED_KEY, JSON.stringify(data));
+    // Notify listeners in the same tab (storage event only fires cross-tab)
+    window.dispatchEvent(new Event('watched-updated'));
+  } catch (err) {
+    console.error('Failed to persist watched episodes:', err);
+  }
+}
+
+/** Returns a Set of watched episode-number strings for the given anime id. */
+export function getWatchedEpisodes(animeId) {
+  const data = readWatched();
+  return new Set(Object.keys(data[String(animeId)] || {}));
+}
+
+/** Marks an episode as watched for the given anime id. */
+export function markEpisodeWatched(animeId, epNum) {
+  const id = String(animeId);
+  const epKey = String(epNum);
+  const data = readWatched();
+  if (!data[id]) data[id] = {};
+  if (data[id][epKey]) return; // already recorded
+  data[id][epKey] = true;
+  writeWatched(data);
+}
+
+/** True if the given episode has been watched. */
+export function isEpisodeWatched(animeId, epNum) {
+  const data = readWatched();
+  return !!data[String(animeId)]?.[String(epNum)];
+}
+
 // ─── Zenshin API (episode details & thumbnails) ────────────────────────────
 // https://github.com/hitarth-gg/zenshin-API
 const ZENSHIN_BASE = 'https://zenshin-supabase-api.onrender.com';

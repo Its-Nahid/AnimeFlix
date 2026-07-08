@@ -32,10 +32,12 @@
 - **Seasons & Relations** — Navigate between related anime and sequels.
 
 ### ▶️ Video Player
+- **Custom Control Bar** — A clean, modern player UI inspired by YouTube/Netflix. A gradient bottom bar (auto-hiding after inactivity) holds play/pause, ±10s skip, hover-expand volume, a click-to-seek scrubber with buffered progress, and a live time display. The video frame stays uncluttered — no floating overlays.
 - **HLS Streaming** — Adaptive bitrate video playback via HLS.js with AES-128-CBC decryption handled server-side.
-- **Quality Selector** — Manual quality switching (Auto / 1080p / 720p / 480p / 360p) with real-time HLS level control.
-- **Server Selection** — Choose between multiple streaming servers (Auto, Kite, Dio, etc.).
+- **Settings Menu** — Nested popover for **Quality** (Auto / 1080p / 720p / 480p / 360p via real-time HLS level control), **Playback Speed** (0.5x–2x), and **Server** selection (Auto, Kite, Dio).
+- **Subtitles / CC** — Toggle and switch between available subtitle tracks.
 - **SUB / DUB Toggle** — Switch between subbed and dubbed audio tracks where available.
+- **Fullscreen & Shortcuts** — Click-to-play, double-click for fullscreen, and a dedicated fullscreen toggle.
 - **3-Column Layout** — Video player + episode list sidebar + related anime recommendations.
 
 ### 🎨 Design
@@ -53,7 +55,7 @@
 │  (Vite :5173) │     │  (Node.js :8080) │     │  (upstream)        │
 └───────────────┘     └──────────────────┘     └────────────────────┘
         │                      │
-        │                      ├──▶ AniList GraphQL (metadata)
+        │                      ├──▶ AniList GraphQL (metadata, cached + rate-limit safe)
         │                      ├──▶ HLS Playlist Rewriting
         │                      └──▶ AES-128 Key Proxy & Decryption
         │
@@ -68,6 +70,8 @@ The Node.js proxy is a critical piece of the architecture. It handles:
 |---|---|
 | **CORS Bypass** | Adds proper CORS headers so the browser can talk to upstream APIs |
 | **AniList → Animetsu ID Mapping** | Translates AniList numeric IDs to upstream internal IDs via title-based search |
+| **AniList Enrichment Cache** | Persists relations/characters/staff/recommendations to `anilist_cache.json`, building a local store so repeat visits rarely re-hit AniList |
+| **Rate-Limit Resilience** | Detects AniList `429/503` responses, enters a cooldown (honoring `Retry-After`), and serves stale/empty data so the rest of the app keeps working |
 | **HLS Playlist Rewriting** | Rewrites `.m3u8` playlists to route segment and key URLs through the proxy |
 | **AES-128 Key Proxying** | Fetches and caches encryption keys for HLS segment decryption |
 | **Image Proxying** | Routes Cloudflare-protected episode thumbnails through the server |
@@ -181,6 +185,11 @@ Then open **http://localhost:5173** in your browser.
 ---
 
 ## 📅 Version History
+
+### v4 — Player Redesign & Resilience 🎛️
+- Rebuilt the **video player controls** from scratch — a modern, auto-hiding bottom control bar (scrubber, play/pause, skip, volume, time, subtitles, settings, fullscreen) replacing the old floating overlays. The video frame is now clean.
+- Moved **Quality / Speed / Server** into a nested settings popover and added **playback speed** control.
+- Made AniList enrichment **rate-limit resilient**: responses are cached to `anilist_cache.json` (survives restarts), and `429/503` responses trigger a cooldown so the app keeps working even when AniList is unavailable.
 
 ### v3 — Streaming & Polish 🎥
 - Integrated **HLS.js** for adaptive bitrate video streaming with AES-128 decryption.

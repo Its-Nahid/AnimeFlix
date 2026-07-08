@@ -388,6 +388,30 @@
   background: rgba(255,255,255,0.08);
 }
 
+/* Watched episode card: dim the thumbnail and show a check overlay */
+.ep-card-new.watched .ep-thumb img {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+.ep-card-new.watched .ep-info h4 {
+  color: #7c7c86;
+}
+.ep-watched-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4caf50;
+  background: rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.ep-watched-overlay svg {
+  background: rgba(0,0,0,0.55);
+  border-radius: 50%;
+  padding: 6px;
+}
+
 .ep-thumb {
   position: relative;
   width: 100%;
@@ -544,19 +568,43 @@
   flex-shrink: 0;
 }
 
+/* Watched episode in the sidebar: dimmed with a check */
+.ep-sidebar-item.watched {
+  color: #5c5c66;
+}
+.ep-sidebar-item.watched .ep-sidebar-num,
+.ep-sidebar-item.watched .ep-sidebar-name {
+  color: #5c5c66;
+}
+.ep-sidebar-item.watched:hover {
+  color: #9a9aa6;
+}
+.ep-sidebar-watched-check {
+  color: #4caf50;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
 /* --- CENTER COLUMN: Player + Info --- */
 .watch-center-col {
   padding: 0;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .watch-center-col .video-wrapper {
   position: relative;
   width: 100%;
+  /* Cap the player so it stays a comfortable size and never towers past the
+     viewport. Height is bounded to the viewport minus navbar + controls, and
+     width follows from the 16:9 ratio so the frame is centered, not huge. */
+  max-width: calc((100vh - 150px) * 16 / 9);
   aspect-ratio: 16/9;
+  margin: 0 auto;
   background: #000;
-  border-radius: 0;
+  border-radius: 0 0 10px 10px;
   overflow: hidden;
   margin-bottom: 0;
 }
@@ -564,29 +612,6 @@
 .watch-center-col .html-video {
   width: 100%;
   height: 100%;
-}
-
-.watch-center-col .server-status-badge {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  z-index: 10;
-  color: #fff;
-}
-
-.watch-center-col .status-dot {
-  width: 6px;
-  height: 6px;
-  background-color: #4caf50;
-  border-radius: 50%;
 }
 
 /* Quality Selector */
@@ -687,6 +712,236 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   margin-left: 6px;
+}
+
+/* ═══ Custom video player control bar (YouTube/Netflix style) ═══ */
+
+/* Cursor + control auto-hide */
+.watch-center-col .video-wrapper.controls-off { cursor: none; }
+.watch-center-col .video-wrapper .html-video { cursor: pointer; }
+
+/* Center play button (while paused) */
+.vp-center-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  transition: background 0.15s, transform 0.15s;
+  padding-left: 4px;
+}
+.vp-center-play:hover {
+  background: #e50914;
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+/* Bottom control bar with gradient scrim */
+.vp-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 40px 14px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0) 100%);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.video-wrapper.controls-off .vp-controls {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+/* Scrubber */
+.vp-scrubber {
+  position: relative;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.22);
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: height 0.12s ease;
+}
+.vp-scrubber:hover { height: 8px; }
+.vp-scrubber-buffered {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: rgba(255,255,255,0.35);
+  border-radius: 3px;
+}
+.vp-scrubber-played {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: #e50914;
+  border-radius: 3px;
+}
+.vp-scrubber-knob {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e50914;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.vp-scrubber:hover .vp-scrubber-knob { opacity: 1; }
+
+/* Button rows */
+.vp-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.vp-left, .vp-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.vp-btn:hover { background: rgba(255,255,255,0.14); }
+.vp-btn.active { color: #e50914; }
+
+/* Volume */
+.vp-volume {
+  display: flex;
+  align-items: center;
+}
+.vp-volume-slider {
+  width: 0;
+  opacity: 0;
+  height: 4px;
+  margin-left: 0;
+  accent-color: #e50914;
+  cursor: pointer;
+  transition: width 0.18s ease, opacity 0.18s ease, margin-left 0.18s ease;
+}
+.vp-volume:hover .vp-volume-slider {
+  width: 74px;
+  opacity: 1;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.vp-time {
+  font-size: 0.78rem;
+  color: #eee;
+  font-variant-numeric: tabular-nums;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.vp-time-sep { color: #888; margin: 0 2px; }
+
+/* Popover menus (settings / subtitles) */
+.vp-menu-wrap { position: relative; }
+
+.vp-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  min-width: 200px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: rgba(18,18,22,0.97);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  padding: 6px 0;
+  animation: qualityMenuIn 0.15s ease-out;
+}
+.vp-menu::-webkit-scrollbar { width: 4px; }
+.vp-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.vp-menu-title {
+  padding: 8px 14px 6px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.vp-menu-row,
+.vp-menu-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.vp-menu-row:hover,
+.vp-menu-option:hover {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+}
+.vp-menu-value { color: #8a8a8a; font-size: 0.78rem; }
+
+.vp-menu-back {
+  padding: 9px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #bbb;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 4px;
+}
+.vp-menu-back:hover { color: #fff; }
+
+.vp-menu-option.active {
+  color: #fff;
+  background: rgba(229,9,20,0.16);
+  font-weight: 600;
+}
+.vp-menu-option.disabled { color: #666; cursor: default; }
+.vp-menu-option.disabled:hover { background: none; }
+
+.vp-menu-check { color: #e50914; font-weight: 800; }
+
+.vp-hd-badge {
+  background: #e50914;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+  margin-right: 4px;
 }
 
 /* Server Controls Row */
@@ -1280,16 +1535,22 @@
 
 .char-card {
   display: flex;
+  align-items: stretch;
   background: rgba(255,255,255,0.05);
   border-radius: 6px;
   overflow: hidden;
+  transition: background 0.15s;
+}
+.char-card:hover {
+  background: rgba(255,255,255,0.09);
 }
 
 .char-img {
   width: 60px;
-  height: 80px;
+  height: 84px;
   object-fit: cover;
   flex-shrink: 0;
+  background: #1a1a20;
 }
 
 .char-info {
@@ -1297,6 +1558,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .char-name {
@@ -1304,6 +1567,9 @@
   font-family: var(--font-body);
   color: #ccc;
   margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .char-role {
@@ -1311,10 +1577,95 @@
   color: #888;
 }
 
+/* Voice actor (right-aligned) */
+.char-va {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  max-width: 46%;
+  justify-content: flex-end;
+  text-align: right;
+}
+.char-va-name {
+  font-size: 0.72rem;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.char-va-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #1a1a20;
+}
+
+.tab-empty {
+  color: #777;
+  font-size: 0.9rem;
+  padding: 24px 4px;
+}
+
+.related-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Outfit', var(--font-body), sans-serif;
+  margin: 8px 0 16px;
+}
+.related-section-title:not(:first-child) {
+  margin-top: 32px;
+}
+
 .related-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 18px;
+}
+
+/* Poster cards inside the Related tab */
+.related-grid .poster-card-img {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2/3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a1a20;
+}
+.related-grid .poster-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s;
+}
+.related-grid .poster-card:hover .poster-card-img img {
+  transform: scale(1.05);
+}
+.poster-card-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(229,9,20,0.9);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+.poster-card-title {
+  font-size: 0.82rem;
+  color: #ddd;
+  margin-top: 8px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .tabs-header-new {
