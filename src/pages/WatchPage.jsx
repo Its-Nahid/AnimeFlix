@@ -695,8 +695,8 @@ function WatchPage() {
               <div className="watch-anime-meta-grid">
                 <div className="meta-item"><span className="meta-label">Type:</span> <span className="meta-value">{anime.type || 'TV'}</span></div>
                 <div className="meta-item"><span className="meta-label">Episodes:</span> <span className="meta-value">{anime.total_eps || anime.total_episodes || episodes.length}</span></div>
-                {anime.sub_count !== null && anime.sub_count !== undefined && <div className="meta-item"><span className="meta-label">Sub:</span> <span className="meta-value">{anime.sub_count}</span></div>}
-                {anime.dub_count !== null && anime.dub_count !== undefined && <div className="meta-item"><span className="meta-label">Dub:</span> <span className="meta-value">{anime.dub_count}</span></div>}
+                {anime.sub_count > 0 && <div className="meta-item"><span className="meta-label">Sub:</span> <span className="meta-value">{anime.sub_count}</span></div>}
+                {anime.dub_count > 0 && <div className="meta-item"><span className="meta-label">Dub:</span> <span className="meta-value">{anime.dub_count}</span></div>}
                 <div className="meta-item"><span className="meta-label">Status:</span> <span className="meta-value">{anime.status || 'Unknown'}</span></div>
                 <div className="meta-item"><span className="meta-label">Duration:</span> <span className="meta-value">{anime.duration ? `${anime.duration} min` : '24 min'}</span></div>
                 {anime.genres && anime.genres.length > 0 && (

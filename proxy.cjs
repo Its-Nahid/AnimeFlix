@@ -41,23 +41,26 @@ async function syncDB() {
   try {
     const res = await fetch('https://anikotoapi.site/recent-anime');
     if (!res.ok) throw new Error(`Failed to fetch sync data: ${res.status}`);
-    const data = await res.json();
-    if (Array.isArray(data)) {
-      let updatedCount = 0;
-      for (const item of data) {
-        const index = db.findIndex(x => String(x.ani_id) === String(item.ani_id) || String(x.id) === String(item.id));
-        if (index !== -1) {
-          db[index] = { ...db[index], ...item };
-          updatedCount++;
-        } else {
-          db.unshift(item);
-          updatedCount++;
-        }
+    const json = await res.json();
+    // API returns either a plain array OR { ok, data: [...] } envelope
+    const items = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : null);
+    if (!items) { console.warn('[DB Sync] Unexpected response shape from sync API'); return; }
+    let updatedCount = 0;
+    for (const item of items) {
+      const index = db.findIndex(x => String(x.ani_id) === String(item.ani_id) || String(x.id) === String(item.id));
+      if (index !== -1) {
+        db[index] = { ...db[index], ...item };
+        updatedCount++;
+      } else {
+        db.unshift(item);
+        updatedCount++;
       }
-      if (updatedCount > 0) {
-        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
-        console.log(`[DB Sync] Updated ${updatedCount} items and saved to disk.`);
-      }
+    }
+    if (updatedCount > 0) {
+      fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+      console.log(`[DB Sync] Updated ${updatedCount} items and saved to disk.`);
+    } else {
+      console.log('[DB Sync] No new updates.');
     }
   } catch (err) {
     console.error('[DB Sync Error]:', err.message);
@@ -77,204 +80,7 @@ function formatStartDateAnikoto(airedStr, yearNum) {
   return yearNum ? String(yearNum) : null;
 }
 
-// ─── AniList enrichment (relations / characters / staff / recommendations) ──
-// The local DB has no cast/relation data, so we pull it from AniList's public
-// GraphQL API keyed by the AniList id (media.ani_id). Results are cached both
-// in memory AND persisted to disk (anilist_cache.json) so the site gradually
-// builds its own store of AniList data — repeat visits never re-hit the API and
-// the cache survives restarts, keeping us well under AniList's rate limit.
-const _anilistDetailsCache = {}; // anilistId -> { relations, characters, staff, recommendations }
-const ANILIST_CACHE_PATH = pathLib.join(__dirname, 'anilist_cache.json');
 
-// While AniList is rate-limiting us (HTTP 429/503), skip network calls entirely
-// until this timestamp (ms). Anything already cached is still served; anything
-// not cached returns null so the anime page loads without AniList extras.
-let _anilistCooldownUntil = 0;
-
-function loadAnilistCache() {
-  try {
-    if (fs.existsSync(ANILIST_CACHE_PATH)) {
-      const data = JSON.parse(fs.readFileSync(ANILIST_CACHE_PATH, 'utf8'));
-      let n = 0;
-      for (const k of Object.keys(data || {})) { _anilistDetailsCache[k] = data[k]; n++; }
-      console.log(`[AniList Cache] Loaded ${n} enriched entries from anilist_cache.json`);
-    }
-  } catch (err) {
-    console.error('[AniList Cache] Failed to load:', err.message);
-  }
-}
-
-// Debounced disk write so a burst of visits doesn't thrash the filesystem.
-let _anilistSaveTimer = null;
-function persistAnilistCache() {
-  if (_anilistSaveTimer) return;
-  _anilistSaveTimer = setTimeout(() => {
-    _anilistSaveTimer = null;
-    try {
-      fs.writeFileSync(ANILIST_CACHE_PATH, JSON.stringify(_anilistDetailsCache), 'utf8');
-    } catch (err) {
-      console.error('[AniList Cache] Failed to persist:', err.message);
-    }
-  }, 3000);
-}
-
-const ANILIST_DETAILS_QUERY = `
-query ($id: Int) {
-  Media(id: $id) {
-    relations {
-      edges {
-        relationType
-        node { id title { romaji english } format coverImage { large medium } }
-      }
-    }
-    characters(sort: [ROLE, RELEVANCE], perPage: 16) {
-      edges {
-        role
-        node { id name { full } image { large medium } }
-        voiceActors(language: JAPANESE) { name { full } image { large medium } }
-      }
-    }
-    staff(perPage: 12) {
-      edges {
-        role
-        node { id name { full } image { large medium } }
-      }
-    }
-    recommendations(perPage: 16, sort: RATING_DESC) {
-      nodes {
-        mediaRecommendation {
-          id title { romaji english } format averageScore coverImage { large medium }
-        }
-      }
-    }
-  }
-}`;
-
-// Resolves to { body: Buffer, status: number, retryAfter: number|null }.
-// We append the HTTP status and any Retry-After header after the body using
-// curl's -w writeout so we can detect rate limiting (429) without extra tooling.
-function anilistPost(query, variables) {
-  return new Promise((resolve, reject) => {
-    const body = JSON.stringify({ query, variables });
-    const MARKER = '\n__META__:';
-    const args = [
-      '-s', '--max-time', '15',
-      '-X', 'POST',
-      '-H', 'Content-Type: application/json',
-      '-H', 'Accept: application/json',
-      '-d', body,
-      '-w', `${MARKER}%{http_code}:%{header_json}`,
-      'https://graphql.anilist.co'
-    ];
-    const curl = spawn('curl', args);
-    const chunks = [];
-    curl.stdout.on('data', c => chunks.push(c));
-    curl.stdout.on('end', () => {
-      const full = Buffer.concat(chunks).toString('utf8');
-      const idx = full.lastIndexOf(MARKER);
-      let bodyStr = full, status = 0, retryAfter = null;
-      if (idx !== -1) {
-        bodyStr = full.slice(0, idx);
-        const meta = full.slice(idx + MARKER.length);
-        const colon = meta.indexOf(':');
-        status = parseInt(colon === -1 ? meta : meta.slice(0, colon), 10) || 0;
-        // header_json is a JSON object of response headers (values are arrays)
-        try {
-          const headers = JSON.parse(meta.slice(colon + 1));
-          const ra = headers['retry-after'] || headers['Retry-After'];
-          if (ra) retryAfter = parseInt(Array.isArray(ra) ? ra[0] : ra, 10) || null;
-        } catch { /* older curl without header_json — ignore */ }
-      }
-      resolve({ body: Buffer.from(bodyStr, 'utf8'), status, retryAfter });
-    });
-    curl.stderr.on('data', () => {});
-    curl.on('error', reject);
-  });
-}
-
-async function fetchAnilistDetails(anilistId) {
-  const key = String(anilistId);
-  if (!key || key === 'undefined' || key === 'null') return null;
-  // Serve from cache whenever we have it — this is the primary defense against
-  // rate limits and lets the on-disk store grow into a full local dataset.
-  if (_anilistDetailsCache[key]) return _anilistDetailsCache[key];
-
-  // If AniList recently rate-limited us, don't even try — return null so the
-  // rest of the anime page (info, episodes, player) loads normally.
-  if (Date.now() < _anilistCooldownUntil) return null;
-
-  try {
-    const { body, status, retryAfter } = await anilistPost(ANILIST_DETAILS_QUERY, { id: parseInt(key, 10) });
-
-    // Rate limited / temporarily unavailable → enter a cooldown and bail out.
-    if (status === 429 || status === 503) {
-      const waitSec = retryAfter && retryAfter > 0 ? retryAfter : 60;
-      _anilistCooldownUntil = Date.now() + waitSec * 1000;
-      console.warn(`[AniList] Rate limited (HTTP ${status}); cooling down for ${waitSec}s. Cached entries still served.`);
-      return null;
-    }
-
-    const json = JSON.parse(body.toString('utf8'));
-    // GraphQL-level rate limit surfaces as an errors array with status 429.
-    if (Array.isArray(json?.errors) && json.errors.some(e => e.status === 429)) {
-      _anilistCooldownUntil = Date.now() + 60 * 1000;
-      console.warn('[AniList] GraphQL rate limit; cooling down 60s.');
-      return null;
-    }
-    const media = json?.data?.Media;
-    if (!media) return null;
-
-    const relations = (media.relations?.edges || []).map(edge => ({
-      id: edge.node.id,
-      relation_type: edge.relationType,
-      format: edge.node.format,
-      title: edge.node.title,
-      cover_image: {
-        large: edge.node.coverImage?.large || edge.node.coverImage?.medium || '',
-        medium: edge.node.coverImage?.medium || ''
-      }
-    }));
-
-    const characters = (media.characters?.edges || []).map(edge => ({
-      id: edge.node.id,
-      name: edge.node.name?.full || '',
-      role: edge.role ? edge.role.charAt(0) + edge.role.slice(1).toLowerCase() : '',
-      image: edge.node.image?.large || edge.node.image?.medium || '',
-      voice_actor: edge.voiceActors?.[0]?.name?.full || '',
-      voice_actor_image: edge.voiceActors?.[0]?.image?.large || edge.voiceActors?.[0]?.image?.medium || ''
-    }));
-
-    const staff = (media.staff?.edges || []).map(edge => ({
-      id: edge.node.id,
-      name: edge.node.name?.full || '',
-      role: edge.role || '',
-      image: edge.node.image?.large || edge.node.image?.medium || ''
-    }));
-
-    const recommendations = (media.recommendations?.nodes || [])
-      .map(n => n.mediaRecommendation)
-      .filter(Boolean)
-      .map(rec => ({
-        id: rec.id,
-        title: rec.title,
-        format: rec.format,
-        type: rec.format,
-        average_score: rec.averageScore || null,
-        cover_image: {
-          large: rec.coverImage?.large || rec.coverImage?.medium || '',
-          medium: rec.coverImage?.medium || ''
-        }
-      }));
-
-    const result = { relations, characters, staff, recommendations };
-    _anilistDetailsCache[key] = result;
-    persistAnilistCache();
-    return result;
-  } catch (err) {
-    console.error(`[AniList] Enrichment failed for ${anilistId}:`, err.message);
-    return null;
-  }
-}
 
 function mapAnikotoMedia(media) {
   if (!media) return null;
@@ -302,8 +108,10 @@ function mapAnikotoMedia(media) {
     description: media.description || '',
     season: media.season ? media.season.toUpperCase() : null,
     start_date: formatStartDateAnikoto(media.aired, media.year),
-    sub_count: typeof media.is_sub === 'number' ? media.is_sub : null,
-    dub_count: typeof media.is_dub === 'number' ? media.is_dub : null,
+    // is_sub / is_dub from the DB are episode counts (integers).
+    // Use null only when the field is truly absent/undefined — 0 is a valid value.
+    sub_count: (media.is_sub !== undefined && media.is_sub !== null) ? parseInt(media.is_sub, 10) : null,
+    dub_count: (media.is_dub !== undefined && media.is_dub !== null) ? parseInt(media.is_dub, 10) : null,
     next_airing_ep: (media.next_air_schedule_time && media.next_air_ep) ? {
       ep_num: media.next_air_ep,
       time_left: Math.max(0, media.next_air_schedule_time - Math.floor(Date.now() / 1000))
@@ -423,7 +231,9 @@ function decryptSegment(encBuf, keyBuf, ivHex) {
 // ─── Main curl streaming proxy ───────────────────────────────────────────────
 // keyUrl / ivHex: when set, buffer the whole segment, decrypt, then send.
 function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
-  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const protoHeader = req.headers['x-forwarded-proto'] || 'http';
+  const protocol = protoHeader.split(',')[0].trim();
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
   const args = [
     '-s', '-i', '-N',
     '-H', `User-Agent: ${USER_AGENT}`,
@@ -585,7 +395,7 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
               if (!orig.startsWith('http://') && !orig.startsWith('https://')) {
                 try { abs = new URL(orig, baseUrl).toString(); } catch (e) { abs = baseUrl + orig; }
               }
-              const proxied = `${protocol}://${req.headers.host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
+              const proxied = `${protocol}://${host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
               return trimmed.substring(0, us) + proxied + trimmed.substring(ue);
             }
           }
@@ -597,7 +407,7 @@ function makeCurlRequest(target, incomingHeaders, res, req, keyUrl, ivHex) {
         if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
           try { abs = new URL(trimmed, baseUrl).toString(); } catch (e) { abs = baseUrl + trimmed; }
         }
-        let segUrl = `${protocol}://${req.headers.host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
+        let segUrl = `${protocol}://${host}/api/proxy/hls?url=${encodeURIComponent(abs)}`;
         if (currentRawKeyUrl) {
           const iv = segIdx.toString(16).padStart(32, '0');
           segUrl += `&keyUrl=${encodeURIComponent(currentRawKeyUrl)}&iv=${iv}`;
@@ -800,16 +610,6 @@ const server = http.createServer(async (req, res) => {
 
       const mapped = mapAnikotoMedia(media);
 
-      // Enrich with AniList cast/relation data (cached). Non-fatal on failure.
-      const anilistId = media.ani_id || media.id;
-      const details = await fetchAnilistDetails(anilistId);
-      if (details) {
-        mapped.relations = details.relations;
-        mapped.characters = details.characters;
-        mapped.staff = details.staff;
-        mapped.recommendations = details.recommendations;
-      }
-
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, data: mapped }));
     } catch (err) {
@@ -907,8 +707,10 @@ const server = http.createServer(async (req, res) => {
         throw new Error('Invalid JSON response from upstream watch solver');
       }
       
-      const protocol = req.headers['x-forwarded-proto'] || 'http';
-      const selfBase = `${protocol}://${req.headers.host}`;
+      const protoHeader = req.headers['x-forwarded-proto'] || 'http';
+      const protocol = protoHeader.split(',')[0].trim();
+      const host = req.headers['x-forwarded-host'] || req.headers.host;
+      const selfBase = `${protocol}://${host}`;
       const response = {
         id: anilistId, episode: parseInt(ep, 10) || 1,
         server: upstreamWatch.server || serverParam,
@@ -1004,6 +806,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Node-Animetsu-API CORS Proxy is listening on port ${PORT} at http://0.0.0.0:${PORT}`);
   loadDB();
-  loadAnilistCache();
 
 });
