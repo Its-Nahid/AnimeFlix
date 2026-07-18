@@ -1,5 +1,324 @@
 [
   {
+    "id": 8957,
+    "title": "The Elusive Samurai Season 2",
+    "alternative": "Nige Jouzu no Wakagimi 2nd Season",
+    "titles": "Nigewaka",
+    "native": "逃げ上手の若君 第二期",
+    "slug": "the-elusive-samurai-season-2-359bc",
+    "rating": "R",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/7f57099b67a3623de9cf233e2fef7885.jpg",
+    "is_sub": 1,
+    "description": "Second season of Nige Jouzu no Wakagimi.",
+    "aired": "Jul 17, 2026 to ?",
+    "season": "summer",
+    "year": 2026,
+    "duration": "",
+    "status": "Currently Airing",
+    "mal_id": "60059",
+    "episodes": "",
+    "ani_id": "182616",
+    "source": "manga",
+    "s_id": 348309,
+    "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182616-kmIqMEUsLYrO.jpg",
+    "updated_at": "2026-07-17 17:10:06",
+    "next_air_schedule_time": 1784903400,
+    "next_air_ep": 2,
+    "terms_by_type": {
+      "genre": [
+        "Adventure",
+        "Comedy"
+      ],
+      "producers": [
+        "Aniplex"
+      ],
+      "studios": [
+        "CloverWorks"
+      ],
+      "type": [
+        "TV"
+      ]
+    }
+  },
+  {
+    "id": 8949,
+    "title": "Mebius Dust",
+    "alternative": "Mebius Dust",
+    "titles": "Möbius Dust, Mobius Dust",
+    "native": "メビウス・ダスト",
+    "slug": "mebius-dust-a698c",
+    "rating": "",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/7a9dc7e9364e7fb0d4408af7f06c0dd0.jpg",
+    "is_sub": 2,
+    "description": "10 years after a mysterious meteorite crashes to Earth, people called \"Rams Carriers\" develop superhuman abilities called \"Rams\". However, those who develop these special abilities can only survive in the presence of the \"Mebius Dust\" released by a giant crystal, and so they are forbidden from leaving the town of Shinkatsushika.Within Shinkatsushika, Rams Carrier children use their Rams to play a territory-conquering game to alleviate their boredom at being unable to leave town. High school student Araki along with his younger sister, Stella, and his childhood friend, Olga, form a team called \"Polis Hopper\" and throw themselves into the game. Their destinies begin to change when Professor Yuda, a researcher who studies Rams, asks them to participate in a certain experiment...(Source: Official Site)",
+    "aired": "Jul 9, 2026 to ?",
+    "season": "summer",
+    "year": 2026,
+    "duration": "",
+    "status": "Currently Airing",
+    "mal_id": "63802",
+    "episodes": "",
+    "ani_id": "108992",
+    "source": "other",
+    "s_id": 919831,
+    "background_image": "",
+    "updated_at": "2026-07-16 15:17:45",
+    "next_air_schedule_time": 1784817000,
+    "next_air_ep": 3,
+    "terms_by_type": {
+      "genre": [
+        "Action",
+        "Supernatural"
+      ],
+      "producers": [
+        "Asmik Ace"
+      ],
+      "studios": [
+        "Doga Kobo"
+      ],
+      "type": [
+        "TV"
+      ]
+    },
+    "score": "5.75"
+  },
+  {
+    "id": 8948,
+    "title": "Tomb Raider King",
+    "alternative": "Dogulwang",
+    "titles": "Toukutsu Ou, 盗掘王",
+    "native": "도굴왕",
+    "slug": "tomb-raider-king-91d21",
+    "rating": "PG",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/6155154f7bc5b09a7adcf5e48db620dd.jpg",
+    "is_sub": 2,
+    "description": "Undercover behind enemy lines, Jooheon's newest plan to torment TKBM will involve taking them down from the inside! Stealing their relics and causing infighting is just the tip of the iceberg on what he'll do to make the group pay for their sins. But with the appearance of the Tower of Pride, Jooheon's skills in rage-baiting will truly be tested as he must pit the most fearsome warlords against each other! Will Jooheon Suh come out on top in the battle of the greatest conquerors of history?(Source: Yen Press)",
+    "aired": "Jul 9, 2026 to ?",
+    "season": "summer",
+    "year": 2026,
+    "duration": "20 min",
+    "status": "Currently Airing",
+    "mal_id": "63316",
+    "episodes": "12",
+    "ani_id": "184356",
+    "source": "manga",
+    "s_id": 700648,
+    "background_image": "",
+    "updated_at": "2026-07-15 17:48:00",
+    "next_air_schedule_time": 1784736900,
+    "next_air_ep": 3,
+    "terms_by_type": {
+      "genre": [
+        "Action",
+        "Adventure",
+        "Fantasy"
+      ],
+      "studios": [
+        "Studio Eek"
+      ],
+      "type": [
+        "TV"
+      ]
+    },
+    "score": "6.89"
+  },
+  {
+    "id": 8947,
+    "title": "Thunder 3",
+    "alternative": "サンダー３",
+    "titles": "",
+    "native": "サンダー３",
+    "slug": "thunder-3-dbed2",
+    "rating": "N/A",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/951000dc43fbb32245b70a62eaa944d3.jpg",
+    "is_dub": 2,
+    "is_sub": 2,
+    "description": "Three ordinary schoolboys come into possession of a DVD that supposedly opens a gateway to a parallel universe, but when their backs are turned Pyontaro's little sister Futaba passes through and gets kidnapped by the aliens that have overrun that version of Earth! Discovering that their cartoonish bodies make them supermen in the hyper-realistic parallel universe, the boys set out to rescue Futaba.\n\n(Source: Kodansha USA)",
+    "aired": "Jul 9, 2026 to Nov 30, 1899",
+    "season": "summer",
+    "year": 2026,
+    "status": "Currently Airing",
+    "mal_id": "",
+    "episodes": "",
+    "ani_id": "207254",
+    "source": "manga",
+    "s_id": 329830,
+    "background_image": "",
+    "updated_at": "2026-07-15 17:36:33",
+    "next_air_schedule_time": 1784735040,
+    "next_air_ep": 3,
+    "terms_by_type": {
+      "genre": [
+        "Adventure",
+        "Drama",
+        "Sci-Fi"
+      ],
+      "type": [
+        "TV"
+      ]
+    }
+  },
+  {
+    "id": 8956,
+    "title": "The Dangers in My Heart: The Movie",
+    "alternative": "Boku no Kokoro no Yabai Yatsu Movie",
+    "titles": "Bokuyaba, The Dangers in My Heart Season Movie",
+    "native": "僕の心のヤバイやつ 劇場版",
+    "slug": "the-dangers-in-my-heart-the-movie-ae54a",
+    "rating": "PG",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/8fee3cc958c5121489b2575535864ae6.jpg",
+    "is_dub": 1,
+    "description": "A re-edit of both anime seasons featuring newly added footage and will depict the story of Ichikawa and Yamada after the events of the TV series.",
+    "aired": "Feb 13, 2026",
+    "season": "winter",
+    "year": 2026,
+    "duration": "1 hr 45 min",
+    "status": "Finished Airing",
+    "score": "7.72",
+    "mal_id": "59985",
+    "episodes": "1",
+    "ani_id": "182317",
+    "source": "manga",
+    "s_id": 814598,
+    "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182317-zrOrc3AapwmI.jpg",
+    "updated_at": "2026-07-15 22:49:53",
+    "terms_by_type": {
+      "genre": [
+        "Comedy",
+        "Romance"
+      ],
+      "producers": [
+        "Bit grooove promotion"
+      ],
+      "studios": [
+        "Shin-Ei Animation"
+      ],
+      "type": [
+        "Movie"
+      ]
+    },
+    "is_sub": 1
+  },
+  {
+    "id": 8946,
+    "title": "My Stepmother and Stepsisters Aren't Wicked",
+    "alternative": "Ibitte Konai Gibo to Gishi",
+    "titles": "My Mother-in-Law and Sister-in-Law Who Don't Bully Me., My Stepmother and Stepsisters Do Not Pick On Me, Ibikona",
+    "native": "いびってこない義母と義姉",
+    "slug": "my-stepmother-and-stepsisters-aren-t-wicked-7aa48",
+    "rating": "",
+    "poster": "https://cdn.myanimelist.net/images/anime/1912/157082l.jpg",
+    "is_sub": 2,
+    "description": "Miya is the illegitimate child of a certain prominent family. When her mother dies, she's convinced she knows what awaits her in her new home: a life of servitude and misery at the hands of her wicked stepmother and stepsisters! Yet when she finally meets the women she expects to treat her like dirt, they actually end up being...sweet?!(Source: Seven Seas Entertainment)",
+    "aired": "Jul 8, 2026 to ?",
+    "season": "summer",
+    "year": 2026,
+    "duration": "",
+    "status": "Currently Airing",
+    "mal_id": "62102",
+    "episodes": "",
+    "ani_id": "196356",
+    "source": "manga",
+    "s_id": 212694,
+    "background_image": "",
+    "updated_at": "2026-07-15 14:58:02",
+    "next_air_schedule_time": 1784730600,
+    "next_air_ep": 3,
+    "terms_by_type": {
+      "genre": [
+        "Comedy"
+      ],
+      "producers": [
+        "NBCUniversal Entertainment Japan"
+      ],
+      "studios": [
+        "Newon"
+      ],
+      "type": [
+        "TV"
+      ]
+    },
+    "score": "6.92"
+  },
+  {
+    "id": 8945,
+    "title": "Perfect Addiction",
+    "alternative": "パーフェクトアディクション",
+    "titles": "",
+    "native": "パーフェクトアディクション",
+    "slug": "perfect-addiction-147b7",
+    "rating": "",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/eeb80d8de1770107a2647864c8cd70e3.jpg",
+    "is_sub": 2,
+    "description": "Akihito is a college student obsessed with good looks and carnal pleasure, but he can’t stand the handsome-yet-aloof Sae. Things come to a head when Akihito is shot down at a singles mixer by a girl who’s set her romantic sights on Sae. Furious, he follows Sae to the hotel district where he learns Sae’s secret: he’s gay, and he’s having trouble enjoying himself in the bedroom. Breaking through Sae’s mental barriers is exactly the sexy challenge Akihito needed. It awakens something in them both. Will they ever be able to control themselves again?(Source: Seven Seas Entertainment)",
+    "aired": "Jul 8, 2026 to ?",
+    "season": "summer",
+    "year": 2026,
+    "duration": "",
+    "status": "Currently Airing",
+    "score": "6.12",
+    "mal_id": "63514",
+    "episodes": "",
+    "ani_id": "213666",
+    "source": "manga",
+    "s_id": 542277,
+    "background_image": "",
+    "updated_at": "2026-07-15 13:07:33",
+    "next_air_schedule_time": 1784725200,
+    "next_air_ep": 3,
+    "terms_by_type": {
+      "genre": [
+        "Boys Love"
+      ],
+      "studios": [
+        "Imageworks Studio",
+        "IMAGICA Infos"
+      ],
+      "type": [
+        "TV"
+      ]
+    }
+  },
+  {
+    "id": 8941,
+    "title": "Yoroi-Shinden Samurai Troopers Part 2",
+    "alternative": "Yoroi Shin Den Samurai Troopers season 2",
+    "titles": "",
+    "native": "鎧真伝サムライトルーパー 第2クール",
+    "slug": "yoroi-shinden-samurai-troopers-part-2-14f03",
+    "rating": "PG",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/f27ca492fd801ff0b8e96263d7dc4f54.jpg",
+    "is_sub": 2,
+    "description": "Second part of Yoroi Shin Den Samurai Troopers.",
+    "aired": "Jul 7, 2026 to ?",
+    "season": "summer",
+    "year": 2026,
+    "duration": "",
+    "status": "Currently Airing",
+    "score": "6.38",
+    "mal_id": "63047",
+    "episodes": "12",
+    "ani_id": "209800",
+    "source": "original",
+    "s_id": 787722,
+    "background_image": "",
+    "updated_at": "2026-07-15 08:58:11",
+    "next_air_schedule_time": 1784644200,
+    "next_air_ep": 3,
+    "terms_by_type": {
+      "genre": [
+        "Action",
+        "Fantasy"
+      ],
+      "studios": [
+        "Sunrise"
+      ],
+      "type": [
+        "TV"
+      ]
+    }
+  },
+  {
     "id": 8954,
     "title": "Shiboyugi: Playing Death Games to Put Food on the Table: 44 - Cloudy Beach",
     "alternative": "Shibou Yuugi de Meshi wo Kuu. 44: Cloudy Beach",
@@ -13,7 +332,7 @@
     "season": "summer",
     "year": 2026,
     "duration": "1 hr 29 min",
-    "status": "Not yet aired",
+    "status": "Finished Airing",
     "score": "5.70",
     "mal_id": "63819",
     "episodes": "1",
@@ -21,7 +340,7 @@
     "source": "light_novel",
     "s_id": 152248,
     "background_image": "",
-    "updated_at": "2026-07-13 20:37:06",
+    "updated_at": "2026-07-15 17:21:59",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -37,7 +356,9 @@
       "type": [
         "Movie"
       ]
-    }
+    },
+    "is_sub": 1,
+    "is_dub": 1
   },
   {
     "id": 8955,
@@ -262,9 +583,9 @@
     "source": "manga",
     "s_id": 265752,
     "background_image": "",
-    "updated_at": "2026-07-14 17:43:06",
-    "next_air_schedule_time": 1784046900,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-14 17:52:23",
+    "next_air_schedule_time": 1784651700,
+    "next_air_ep": 3,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -283,7 +604,8 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "6.53"
   },
   {
     "id": 8934,
@@ -2043,8 +2365,8 @@
     "slug": "draw-this-then-die-5xdt",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/b5b5643277e8ce33117cd33bb7a6a3c1.jpg",
-    "is_dub": 1,
-    "is_sub": 1,
+    "is_dub": 3,
+    "is_sub": 3,
     "description": "Kore Kaite Shine is set in Izu Oshima, an island 120 kilometers south of Tokyo. The story centers on Ai Yasumi, a high school girl who loves to read manga, and learns about the joy and pain of drawing her own manga(Source: Anime News Network)",
     "aired": "2026-07-03",
     "season": "summer",
@@ -2052,14 +2374,14 @@
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "61280",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "188525",
     "source": "manga",
     "s_id": 706998,
     "background_image": "",
-    "updated_at": "2026-07-03 21:20:51",
-    "next_air_schedule_time": 1783089000,
-    "next_air_ep": 1,
+    "updated_at": "2026-07-17 15:52:58",
+    "next_air_schedule_time": 1784903400,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -2071,7 +2393,8 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "7.45"
   },
   {
     "id": 8910,
@@ -2080,9 +2403,9 @@
     "titles": "Kamui-san in the Back",
     "native": "うしろの正面カムイさん",
     "slug": "ushiro-no-shoumen-kamui-san-1f2b5",
-    "rating": "",
+    "rating": "R+",
     "poster": "https://cdn.anipixcdn.co/thumbnail/3c96b49a01b06c9e7feeba7ef289e093.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "Shizuka is a normal high school girl with the ability to see ghosts. Due to her peculiar tendency to attract ghosts, she works as an assistant to Kamui, a famous psychic. Kamui takes pride in his top-notch psychic abilities, but the way he exorcises ghosts is rather unusual!(Source: Shogakukan, translated)",
     "aired": "Jul 4, 2026 to ?",
     "season": "summer",
@@ -2090,14 +2413,14 @@
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "63468",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "207674",
     "source": "manga",
     "s_id": 899465,
-    "background_image": "",
-    "updated_at": "2026-07-03 21:02:01",
-    "next_air_schedule_time": 1783096200,
-    "next_air_ep": 1,
+    "background_image": "https://cdn.anipixcdn.co/background/83cef88ab4ded3e6_1783551267.webp",
+    "updated_at": "2026-07-17 16:54:37",
+    "next_air_schedule_time": 1784910600,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -2115,7 +2438,8 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "6.00"
   },
   {
     "id": 8909,
@@ -2126,7 +2450,7 @@
     "slug": "sorry-about-my-little-brothers-ee156",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/7636db5cbb3b6efa377845c0aa28199d.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "The manga centers on high school student Ito Hazui. During her spring break at the end of her first year of high school, Ito's mother remarries, and Ito moves to live with her new family, becoming Ito Narita. Upon arriving at her new house, Ito is shocked to learn she now has four younger step-brothers. Ito tries her hardest to get along with all of the new members of her family, but the eldest brother Gen is a bit cold to her. However, under his aloof facade, he occasionally shows his kindness.(Source: Anime News Network)",
     "aired": "2026-07-04",
     "season": "summer",
@@ -2139,9 +2463,9 @@
     "source": "manga",
     "s_id": 284705,
     "background_image": "",
-    "updated_at": "2026-07-03 18:06:34",
-    "next_air_schedule_time": 1783090800,
-    "next_air_ep": 1,
+    "updated_at": "2026-07-17 16:50:22",
+    "next_air_schedule_time": 1784905200,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -2154,7 +2478,8 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "6.99"
   },
   {
     "id": 8873,
@@ -2165,7 +2490,7 @@
     "slug": "hell-mode-yarikomi-zuki-no-gamer-wa-haisettei-no-isekai-de-musou-suru-2nd-season",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/7d483a1fec8f31d536082d703d6fbcf9.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "The second season of Hell Mode.",
     "aired": "2026-07",
     "season": "summer",
@@ -2173,12 +2498,12 @@
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "63817",
-    "episodes": "",
+    "episodes": "13",
     "ani_id": "209983",
     "source": "light_novel",
     "s_id": 346306,
     "background_image": "",
-    "updated_at": "2026-07-03 18:06:01",
+    "updated_at": "2026-07-17 16:51:36",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2191,7 +2516,10 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "7.27",
+    "next_air_schedule_time": 1784908800,
+    "next_air_ep": 4
   },
   {
     "id": 8719,
@@ -2202,8 +2530,8 @@
     "slug": "the-drops-of-god-1ergu",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/c1bc7f81bdba1b65aca9d6d1592b41ad.jpg",
-    "is_dub": 11,
-    "is_sub": 13,
+    "is_dub": 13,
+    "is_sub": 15,
     "description": "Shizuku Kanzaki is the only son of world-renowned wine critic Yutaka Kanzaki. From a young age, Shizuku has been subjected to strange education from his father all for the sake of wine. From learning to gracefully decant a drink to intently remembering the smell of leather belts and pencils, the training causes him to grow resentful of everything related to wine. Discontent with his father, he leaves home to become an average sales representative for a beer company, refusing to ever touch wine again.  When his father suddenly passes away, Shizuku finds himself being dragged back into the world he hates so much. As part of his father's will, the one who will inherit his prized wine collection and estate will be the person who can correctly identify the \"12 Apostles\" of wines as well as the legendary \"Drops of God.\" In order to inherit the assets, Shizuku has one year to complete the task, but he finds the proposition ridiculous when he is the only living relative of Yutaka.  What Yutaka failed to tell his son before his death was that he had adopted Issei Tomine into the family a week prior to his passing. Issei is a famous veteran wine critic competing against Shizuku to claim the estate for himself. With no formal training in wine tasting, Shizuku stands no chance against \"The Prince of Wine\" and is at risk of losing everything in this competition. Will he be able to correctly identify the elusive \"Drops of God\" before he runs out of time?",
     "aired": "Apr 10, 2026 to ?",
     "season": "Spring",
@@ -2217,9 +2545,9 @@
     "source": "manga",
     "s_id": 20746,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/202508-K276v0truxE0.jpg",
-    "updated_at": "2026-07-03 16:55:01",
-    "next_air_schedule_time": 1783693800,
-    "next_air_ep": 14,
+    "updated_at": "2026-07-17 16:56:21",
+    "next_air_schedule_time": 1784903400,
+    "next_air_ep": 16,
     "terms_by_type": {
       "genre": [
         "Drama",
@@ -2248,8 +2576,8 @@
     "slug": "that-time-i-got-reincarnated-as-a-slime-season-4-0u851",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/3889837143074f2ccb5989d34dc6e82b.jpg",
-    "is_dub": 10,
-    "is_sub": 13,
+    "is_dub": 13,
+    "is_sub": 15,
     "description": "Demon Lord Rimuru's dream of creating an alliance between humans and monsters takes a step closer to being realized. As Tempest continues to prosper, Granville Rozzo and his granddaughter, Maribel Rozzo, clash with Demon Lord Rimuru over their plan to protect mankind by ruling over them. Meanwhile, in El Dorado, Demon Lord Leon works toward goals of his own. The awakening of a new Hero draws near!",
     "aired": "Apr 3, 2026 to ?",
     "season": "Spring",
@@ -2263,9 +2591,9 @@
     "source": "light_novel",
     "s_id": 20572,
     "background_image": "https://cdn.anipixcdn.co/background/14c2f4ab3ad95f50_1778862809.jpg",
-    "updated_at": "2026-07-03 15:47:23",
-    "next_air_schedule_time": 1783087200,
-    "next_air_ep": 13,
+    "updated_at": "2026-07-17 17:02:18",
+    "next_air_schedule_time": 1784901600,
+    "next_air_ep": 16,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2294,7 +2622,7 @@
     "slug": "koko-wa-ore-ni-makasete-saki-ni-ike-to-itte-kara-10-nen-ga-tattara-densetsu-ni-natteita-bb0e2",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/76f6d92711de6f72ff03aafa7a3a963d.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "The sorcerer Luck believes this to be the end. Besieged by powerful demons, he makes the noble sacrifice of holding back their onslaught while his friends escape. Never sleeping or resting, Luck endures the clash of swords, rain of blood, and never-ending stream of enemies. Against all odds, he vanquishes the commander and emerges victorious, only to find that 10 whole years have passed in the meantime. Furthermore, his body has regressed in age to the point where he looks like a mere teenager.Following his triumph, Luck soon reunites with his friends, the hero Eric Imgard Mendirival and warrior Goran Morton. As they believed Luck to be dead, the pair made sure he went down in history as a hero and prepared to quell the rise of the demons themselves, unaware of Luck's feat. With all this in mind, Luck just wants a laid-back life, so he applies as a novice adventurer under the name Lock and sets out on a journey alongside brand new companions.[Written by MAL Rewrite]",
     "aired": "Jul 3, 2026 to ?",
     "season": "summer",
@@ -2302,14 +2630,14 @@
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "62617",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "199748",
     "source": "light_novel",
     "s_id": 149159,
     "background_image": "",
-    "updated_at": "2026-07-03 14:44:53",
-    "next_air_schedule_time": 1783690200,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-17 14:12:12",
+    "next_air_schedule_time": 1784899800,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2325,7 +2653,8 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "6.85"
   },
   {
     "id": 8907,
@@ -2336,7 +2665,7 @@
     "slug": "the-frontier-lord-begins-with-zero-subjects",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/7077222f85576dddd748ca200e9162af.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "Dias finally returns home after decades of war. He's hailed as a hero and promptly rewarded with his own domain...which turns out to be little more than empty plains. Population: zero. Dias, who has only ever known battle, finds himself at a loss. How is he supposed to survive, let alone cultivate his territory into a thriving, prosperous dominion when there's nothing but grass as far as can see? Fortunately for Dias, a horned girl by the name of Alna is about to show him there's more to the plains than meets the eye! (Source: J-Novel Club)Note: Ryoumin 0-Nin Start no Henkyou Ryoushu-sama is streaming a week advance of the TV broadcast on Prime Video beginning July 3rd, 2026. Regular broadcasting begins on July 10th, 2026.",
     "aired": "2026-07-03",
     "season": "summer",
@@ -2349,9 +2678,9 @@
     "source": "light_novel",
     "s_id": 155402,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/196218-lX0y9T76KQkC.jpg",
-    "updated_at": "2026-07-03 14:13:46",
-    "next_air_schedule_time": 1783690200,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-17 13:42:21",
+    "next_air_schedule_time": 1784899800,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2367,7 +2696,8 @@
       "type": [
         "ONA"
       ]
-    }
+    },
+    "score": "7.07"
   },
   {
     "id": 8906,
@@ -2378,7 +2708,7 @@
     "slug": "crowned-in-a-hundred-days",
     "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/b33af6872231ee9e0dc690a3619bd664.jpg",
-    "is_sub": 7,
+    "is_sub": 8,
     "description": "One second the restaurant was filled with joy, the next it was a river of blood… The king, who clearly loved his people, suddenly became a bloodthirsty beast… \"Ming\" has lost everyone he cared about; this terrible king is truly awful! I will take my revenge! Wait, you mean the soul in front of me with only 100 days left to live is the real \"Lie\"? Alright, alright! 100 days—let's both be crowned kings together!\n\n(Source: Bilibili, translated)",
     "aired": "Jul 3, 2026 to Nov 30, 1899",
     "season": "&nbsp",
@@ -2390,9 +2720,9 @@
     "source": "original",
     "s_id": 410297,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/213484-zmNnSuAl8WvI.jpg",
-    "updated_at": "2026-07-14 04:45:01",
-    "next_air_schedule_time": 1784260800,
-    "next_air_ep": 8,
+    "updated_at": "2026-07-17 04:56:16",
+    "next_air_schedule_time": 1784606400,
+    "next_air_ep": 9,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2506,7 +2836,7 @@
     "slug": "kirio-fanclub-6nkns",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/81bea31a79deb32965455a1e507c944f.jpg",
-    "is_dub": 4,
+    "is_dub": 6,
     "is_sub": 12,
     "description": "Miyoshi Aimi and Nami Sometani are two high school girls who often find themselves talking about a boy in their class, Kirio. This lighthearted romantic comedy follows the daily lives of these two friends and rivals on a journey that, for now, seems to be heading everywhere but love.",
     "aired": "Apr 3, 2026 to ?",
@@ -2520,7 +2850,7 @@
     "ani_id": "181284",
     "s_id": 20728,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/181284-BthvQRasKf46.jpg",
-    "updated_at": "2026-07-03 08:53:21",
+    "updated_at": "2026-07-15 22:17:22",
     "next_air_schedule_time": 1781796360,
     "next_air_ep": 12,
     "terms_by_type": {
@@ -2549,9 +2879,9 @@
     "titles": "Reincarnation no Hanabira リィンカーネーションの花弁 Reincarnation no Kaben; Petals of Reincarnation, Reincarnation no Kaben, Reincarnation no Hanabira, リィンカーネーションの花弁, Petals of Reincarnation",
     "native": "Reincarnation no Kaben",
     "slug": "petals-of-reincarnation-weofu",
-    "rating": "",
+    "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/43b4bb96c3cb145280f157ace0740dc3.jpg",
-    "is_dub": 8,
+    "is_dub": 10,
     "is_sub": 13,
     "description": "There exists an object known as the \"Branch of Reincarnation\" that can grant people the talents of the past lives, so long as they slit their own throat with it.  Touya Senji is a teenage boy struggling with low self-esteem after growing up in the shadow of his gifted older brother. He comes to the decision that academic studies are his last resort in the search for talent, but fails to find satisfaction despite constantly placing in the top 100 for national mock exams.  In a twist of fate, Touya encounters one of his classmates, Haito Luo Buffett, a \"Returner\" who has resurrected the talents of her past life using the Branch of Reincarnation, as she fights against a serial killer.",
     "aired": "Apr 3, 2026 to ?",
@@ -2565,7 +2895,7 @@
     "ani_id": "179950",
     "s_id": 20629,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/179950-j8dYIqYi8KLC.jpg",
-    "updated_at": "2026-07-03 08:53:12",
+    "updated_at": "2026-07-15 22:17:03",
     "next_air_schedule_time": 1782401400,
     "next_air_ep": 13,
     "terms_by_type": {
@@ -2595,7 +2925,7 @@
     "slug": "farming-life-in-another-world-season-2-nisvn",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/1b81139cc390ee1ce67042addf1d32cd.jpg",
-    "is_dub": 10,
+    "is_dub": 12,
     "is_sub": 12,
     "description": "Second season of . During the final years of his life, Hiraku Machio remained confined to a hospital bed with a terminal illness until he finally passed away. Taking pity on the unfair life he lived, a god decides to reincarnate Hiraku in another world where he can live as he pleases. Wanting to try farming in this new life, he is bestowed with an all-in-one \"Almighty Farming Tool\" that can transform into any useful implement he wishes. Hiraku is then transported to a forest seemingly far from civilization. Here, he plans to build and farm everything from scratch—gradually developing the lifeless area into a thriving new society.",
     "aired": "Apr 6, 2026 to ?",
@@ -2610,7 +2940,7 @@
     "source": "light_novel",
     "s_id": 20599,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/197824-rS7XjJQ0CZs2.jpg",
-    "updated_at": "2026-07-03 08:53:04",
+    "updated_at": "2026-07-15 17:50:01",
     "next_air_schedule_time": 1782135000,
     "next_air_ep": 12,
     "terms_by_type": {
@@ -2640,7 +2970,7 @@
     "slug": "tamon-s-b-side-fuove",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/8aeea62fd2f5ce7bd80c28c5531d793f.jpg",
-    "is_dub": 9,
+    "is_dub": 11,
     "is_sub": 13,
     "description": "Idol group F/ACE has recently risen in popularity all thanks to Tamon Fukuhara—its handsome, wild, and talented leader. Seventeen-year-old Utage Kinoshita is one of the vocal fans who greatly admires F/ACE. As her life revolves around worshiping Tamon, Utage works at a housecleaning company to earn money and continue supporting him.  When her coworker gets sick, Utage is assigned to a new client with the same name as Tamon. She believes it is merely a coincidence—until she comes face to face with the real celebrity! Her surprise only grows when she discovers that, unlike the extroverted superstar known to the public, Tamon is actually a gloomy guy with no friends or self-confidence.  Given that Utage's adoration for Tamon knows no bounds, she vows to keep his secret and stay by his side—but dealing with Tamon's contrasting behaviors in and out of work might be the toughest job out there.",
     "aired": "Jan 4, 2026 to Mar 27, 2026",
@@ -2655,7 +2985,7 @@
     "source": "manga",
     "s_id": 20353,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/178005-X4Tr7p0sCQbx.jpg",
-    "updated_at": "2026-07-03 08:52:43",
+    "updated_at": "2026-07-17 09:20:00",
     "next_air_schedule_time": 1774450800,
     "next_air_ep": 13,
     "terms_by_type": {
@@ -2731,7 +3061,7 @@
     "slug": "bang-dream-yumemita",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/f19071efa008954f53b3c780dfe1b121.jpg",
-    "is_sub": 3,
+    "is_sub": 5,
     "description": "The latest anime project in the BanG Dream! franchise, spotlighting the band members in Mugendai Mewtype.",
     "aired": "2026-07-02",
     "season": "summer",
@@ -2739,14 +3069,14 @@
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "62430",
-    "episodes": "",
+    "episodes": "13",
     "ani_id": "198376",
     "source": "other",
     "s_id": 286745,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/198376-1b4DxjIUwMIY.jpg",
-    "updated_at": "2026-07-03 06:57:51",
-    "next_air_schedule_time": 1783605600,
-    "next_air_ep": 4,
+    "updated_at": "2026-07-16 14:12:50",
+    "next_air_schedule_time": 1784815200,
+    "next_air_ep": 6,
     "terms_by_type": {
       "genre": [
         "Music"
@@ -2757,21 +3087,22 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "7.53"
   },
   {
     "id": 8891,
     "title": "Above Myriads",
     "alternative": "Wan Ren Zhi Shang",
-    "titles": "Above Myriads, Above Ten Thousand People",
-    "native": "万人之上",
+    "titles": "Above Myriads, Above Ten Thousand People 万人之上 Wan Ren Zhi Shang; Above Myriads, Wan Ren Zhi Shang, 万人之上",
+    "native": "Wan Ren Zhi Shang",
     "slug": "above-myriads",
-    "rating": "PG-13",
+    "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/156444ebc2d8ac646a1d887b0d2a7f31.jpg",
-    "is_sub": 6,
-    "description": "Yi Feng traveled to the Xianjiang Continent. Since he was born without spiritual roots, he could only survive by relying on the \"essential life skills\" given by the system. Little did he know that in the eyes of those practitioners, his strength was already at the god level, and his every move affected the entire pattern of the Xianjiang Continent. Yi Feng easily resolved many crises without knowing it, which also brought about many passionate and hilarious scenes, and brought new opportunities and choices to the people living on this continent.(Source: iQIYI, Google translated)",
-    "aired": "2026-06-09",
-    "season": "unknown",
+    "is_sub": 8,
+    "description": "Yi Feng traveled to the Xianjiang Continent. Since he was born without spiritual roots, he could only survive by relying on the \"essential life skills\" given by the system. Little did he know that in the eyes of those practitioners, his strength was already at the god level, and his every move affected the entire pattern of the Xianjiang Continent. Yi Feng easily resolved many crises without knowing it, which also brought about many passionate and hilarious scenes, and brought new opportunities and choices to the people living on this continent.\n\n(Source: iQIYI, Google translated)",
+    "aired": "Jun 9, 2026 to Nov 30, 1899",
+    "season": "Spring",
     "year": 2026,
     "duration": "20",
     "status": "Currently Airing",
@@ -2781,7 +3112,7 @@
     "source": "other",
     "s_id": 506282,
     "background_image": "",
-    "updated_at": "2026-07-03 06:55:04",
+    "updated_at": "2026-07-14 22:50:02",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2797,7 +3128,8 @@
       "type": [
         "ONA"
       ]
-    }
+    },
+    "score": "6.75"
   },
   {
     "id": 8905,
@@ -2808,7 +3140,7 @@
     "slug": "chainsmoker-cat",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/d0d30d8fa20869949f24a70b3be9a5f4.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "Yani is a catgirl with a seriously bad smoking habit. She smokes so much that her apartment smells like ash and is littered with cigarette butts—and plenty of other trash! Every time she tries to quit, she becomes weak to the cravings and gives in almost instantly. Will she ever get her life together, or is she doomed to live as a chainsmoking slob forever? (Source: Seven Seas Entertainment)",
     "aired": "2026-07-03",
     "season": "summer",
@@ -2821,9 +3153,9 @@
     "source": "manga",
     "s_id": 486925,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/207141-MvHAS2YVfJzL.jpg",
-    "updated_at": "2026-07-03 06:52:36",
-    "next_air_schedule_time": 1783611000,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-16 16:19:51",
+    "next_air_schedule_time": 1784820600,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -2835,7 +3167,9 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "is_dub": 1,
+    "score": "7.03"
   },
   {
     "id": 8903,
@@ -2846,7 +3180,7 @@
     "slug": "the-exiled-heavy-knight-knows-how-to-game-the-system",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/81d8f6bc61e91eeecbb1e08f767c475a.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "Born into a prestigious family of master swordsmen, Elymas Edvaughn’s future shatters when he awakens the so-called “defective” Heavy Knight class. Disowned and cast out, he regains memories of another life—and realizes this world mirrors a VR game he once mastered. Armed with knowledge no one else possesses, he sets out to rewrite his fate and prove the strength of the “weakest” class.(Source: Crunchyroll)",
     "aired": "2026-07-03",
     "season": "summer",
@@ -2859,9 +3193,9 @@
     "source": "manga",
     "s_id": 643199,
     "background_image": "",
-    "updated_at": "2026-07-03 06:52:18",
-    "next_air_schedule_time": 1783610760,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-16 18:16:09",
+    "next_air_schedule_time": 1784820360,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2873,7 +3207,9 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "is_dub": 1,
+    "score": "7.12"
   },
   {
     "id": 8904,
@@ -2884,7 +3220,7 @@
     "slug": "kaiju-girl-caramelise",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/5c9ce0fff99fd22593f7ce6a9ec476b5.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "Kuroe Akaishi just wants a normal high school life—but that’s impossible with a rare condition that turns her into a giant kaiju whenever her emotions spike! Things get even worse when she falls for Arata Minami, the most popular boy in class. Now every blush, heartbeat, and crush could trigger a monster transformation. Can Kuroe survive high school love before it destroys everything around her?!(Source: Crunchyroll)",
     "aired": "2026-07-03",
     "season": "summer",
@@ -2897,9 +3233,9 @@
     "source": "manga",
     "s_id": 629411,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/204466-cpbNGN9qHrGP.jpg",
-    "updated_at": "2026-07-03 06:51:43",
-    "next_air_schedule_time": 1783614480,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-16 18:06:45",
+    "next_air_schedule_time": 1784824080,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -2912,21 +3248,23 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "is_dub": 1,
+    "score": "7.68"
   },
   {
     "id": 8899,
     "title": "The Villager of Level 999",
     "alternative": "LV999 no Murabito",
-    "titles": "",
-    "native": "LV999の村人",
+    "titles": "LV999の村人 LV999 no Murabito; The Villager of Level 999, Lv999 no Murabito, LV999の村人, The Villager of Level 999",
+    "native": "LV999 no Murabito",
     "slug": "the-villager-of-level-999",
-    "rating": "",
+    "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/ed3f8fcf0bcd5ac7f521baf77eeaa3e2.jpg",
-    "is_sub": 2,
-    "description": "Monsters did not always exist in the island country of Hexaldoria, once known as Japan. But, once monsters appeared, their numbers grew in an instant. Eighty percent of the world is now too dangerous for people to live in. With the monsters' arrival, the world bestowed \"Classes\" upon its people.Classes are assigned at birth, and most people live according to them. There are eight COMPETENT classes: FIGHTER, HUNTER, CLERIC, WARRIOR, MAGE, MERCHANT, THIEF. And three special ORACLE classes: KING, SAGE, HERO.The weakest Class of all is VILLAGER.However, Kouji Kagami became \"LEVEL 999\"--the highest level that no one had reached before.When he met the daughter of the Demon King, the world started to change!(Source: BookWalker)",
-    "aired": "2026-07-02",
-    "season": "summer",
+    "is_sub": 4,
+    "description": "Monsters did not always exist in the island country of Hexaldoria, once known as Japan. But, once monsters appeared, their numbers grew in an instant. Eighty percent of the world is now too dangerous for people to live in. With the monsters' arrival, the world bestowed \"Classes\" upon its people.\n\nClasses are assigned at birth, and most people live according to them. There are eight COMPETENT classes: FIGHTER, HUNTER, CLERIC, WARRIOR, MAGE, MERCHANT, THEIF. And three special ORACLE classes: KING, SAGE, HERO.\n\nThe weakest Class of all is VILLAGER.\n\nHowever, Kouji Kagami became \"LEVEL 999\"--the highest level that no one had reached before.\n\nWhen he met the daughter of the Demon King, the world started to change!\n\n(Source: BookWalker)",
+    "aired": "Jul 2, 2026 to Nov 30, 1899",
+    "season": "&nbsp",
     "year": 2026,
     "duration": "",
     "status": "Currently Airing",
@@ -2936,9 +3274,9 @@
     "source": "light_novel",
     "s_id": 638135,
     "background_image": "",
-    "updated_at": "2026-07-03 06:51:26",
-    "next_air_schedule_time": 1783522800,
-    "next_air_ep": 3,
+    "updated_at": "2026-07-15 16:57:44",
+    "next_air_schedule_time": 1784732400,
+    "next_air_ep": 5,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -2952,7 +3290,8 @@
       "type": [
         "ONA"
       ]
-    }
+    },
+    "score": "6.71"
   },
   {
     "id": 8697,
@@ -3048,7 +3387,7 @@
     "slug": "from-overshadowed-to-overpowered-second-reincarnation-of-a-talentless-sage-dxyxt",
     "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/de4552678ba13f17c6b9ca24401f044c.jpg",
-    "is_sub": 2,
+    "is_sub": 4,
     "description": "Ephtal is reincarnated as a human, coming from modern Earth. In this new world where magic is real, he decides to devote the entirety of his life in the pursuit of magic. Despite his efforts, though, he discovers that he is absolutely talentless in magic, and breathed his last in anguish....But it isn't the end for him just yet! He reincarnates once again bearing the same name, Ephtal, 400 years later. Having retained his knowledge and power, he steals his resolve and once again sets his sights for the peak of magic!\n\n(Source: Comikey)\n\nNote: Rakudai Kenja no Gakuin Musou: Nidome no Tensei, S-Rank Cheat Majutsushi Boukenroku is streaming a week in advance of the TV broadcast on dAnimeStore, ABEMA, U-NEXT, and Anime Hodai beginning June 26th, 2026. Regular broadcasting begins on July 2nd, 2026.",
     "aired": "Jun 26, 2026 to Nov 30, 1899",
     "season": "&nbsp",
@@ -3061,9 +3400,9 @@
     "source": "manga",
     "s_id": 611998,
     "background_image": "https://cdn.anipixcdn.co/background/c9a725ccf82560b9_1782839202.webp",
-    "updated_at": "2026-07-02 15:31:26",
-    "next_air_schedule_time": 1783609200,
-    "next_air_ep": 3,
+    "updated_at": "2026-07-16 15:18:02",
+    "next_air_schedule_time": 1784818800,
+    "next_air_ep": 5,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -3092,7 +3431,7 @@
     "slug": "bang-dream-chan-bcgyn",
     "rating": "G",
     "poster": "https://cdn.anipixcdn.co/thumbnail/a1af768d3b16885b8eb893d58712c1ea.jpg",
-    "is_sub": 39,
+    "is_sub": 41,
     "description": "The livestreamed \"BanG Dream! 10th Anniversary Special!\" announced on Friday, Feb 28th, 2025 that the BanG Dream! franchise will have a new mini-anime series that will air and stream this year. Directors Kenshirou Morii and Seiya Miyajima are returning from the BanG Dream! Girls Band Party! Pico anime and its sequels for the new 52-episode series.",
     "aired": "Oct 2, 2025 to ?",
     "season": "&nbsp",
@@ -3105,9 +3444,9 @@
     "ani_id": "187166",
     "s_id": 19874,
     "background_image": "",
-    "updated_at": "2026-07-02 13:15:27",
-    "next_air_schedule_time": 1782392400,
-    "next_air_ep": 38,
+    "updated_at": "2026-07-16 13:55:06",
+    "next_air_schedule_time": 1784206800,
+    "next_air_ep": 41,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3128,25 +3467,25 @@
     "id": 8901,
     "title": "Bungo Stray Dogs WAN! 2",
     "alternative": "Bungou Stray Dogs Wan! 2",
-    "titles": "Bungo Stray Dogs WAN! TWO",
-    "native": "文豪ストレイドッグス わん！２",
+    "titles": "Bungo Stray Dogs WAN! TWO 文豪ストレイドッグス わん！２ Bungou Stray Dogs Wan! 2; Bungo Stray Dogs WAN! 2, Bungou Stray Dogs Wan! 2, Bunsuto Wan! 2, 文豪ストレイドッグスわん！2, Bungo Stray Dogs Wan! 2",
+    "native": "Bungou Stray Dogs Wan! 2",
     "slug": "bungo-stray-dogs-wan-2",
-    "rating": "",
+    "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/737f922fb259d2d5136d3b855085f6e1.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "The second season of Bungou Stray Dogs Wan!",
-    "aired": "2026-07-02",
-    "season": "summer",
+    "aired": "Jul 2, 2026 to Nov 30, 1899",
+    "season": "&nbsp",
     "year": 2026,
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "62883",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "201667",
     "source": "manga",
     "s_id": 253903,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/201667-QYNOqPVSG3vi.jpg",
-    "updated_at": "2026-07-02 13:12:17",
+    "updated_at": "2026-07-16 16:55:02",
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3161,7 +3500,11 @@
         "Bones",
         "Nomad"
       ]
-    }
+    },
+    "score": "7.12",
+    "next_air_schedule_time": 1784810400,
+    "next_air_ep": 4,
+    "is_dub": 1
   },
   {
     "id": 8900,
@@ -3172,7 +3515,7 @@
     "slug": "dara-san-of-the-reiwa-era-5jhg",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/af3529e45463eadb8afeea43c8cdc2a2.jpg",
-    "is_sub": 1,
+    "is_sub": 3,
     "description": "Clouds blacken the sky and sheets of rain turn the mountain forest into a treacherous maze... A landslide crushes a razor wire fence, and buries a \"NO TRESPASSING\" sign... Two young siblings wander into a dark world where they do not belong, and a long, horrid shadow rears up to meet them- Anyway, so that's how we met Dara-san! She might look kinda scary, but just wait until you get to know her!\"Look, I'm a god of misfortune, okay!? Aren't you kids gonna freak out about my grotesque visage!?\"(Source: Yen Press)",
     "aired": "2026-07-02",
     "season": "summer",
@@ -3185,9 +3528,9 @@
     "source": "manga",
     "s_id": 402991,
     "background_image": "",
-    "updated_at": "2026-07-02 13:08:10",
-    "next_air_schedule_time": 1783600200,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-16 12:42:03",
+    "next_air_schedule_time": 1784809800,
+    "next_air_ep": 4,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3200,18 +3543,19 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "6.64"
   },
   {
     "id": 8173,
     "title": "Koala's Diary",
     "alternative": "Koala Enikki",
-    "titles": "コアラ絵日記 Koala Enikki; Koala's Diary, Koala Enikki, コアラ絵日記, Koala's Diary",
+    "titles": "コアラ絵日記 Koala Enikki; Koala's Diary",
     "native": "Koala Enikki",
     "slug": "koala-s-diary-8sbwi",
     "rating": "G",
     "poster": "https://cdn.anipixcdn.co/thumbnail/ec327f830a5771983e61fb0e4d21a6f4.jpg",
-    "is_sub": 39,
+    "is_sub": 41,
     "description": "The manga is about Koala who writes about daily life, whether it's good or bad, happy or sad, Koala treats every day as a precious day. Koala believes that today is a good day, and tomorrow will be a good day too.",
     "aired": "Oct 2, 2025 to ?",
     "season": "&nbsp",
@@ -3224,9 +3568,9 @@
     "ani_id": "194389",
     "s_id": 19871,
     "background_image": "",
-    "updated_at": "2026-07-02 11:45:02",
-    "next_air_schedule_time": 1783594800,
-    "next_air_ep": 40,
+    "updated_at": "2026-07-16 13:55:01",
+    "next_air_schedule_time": 1784804400,
+    "next_air_ep": 42,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3247,27 +3591,27 @@
     "id": 8898,
     "title": "Hana-Kimi Season 2",
     "alternative": "Hanazakari no Kimitachi e 2nd Season",
-    "titles": "Hana-Kimi, Hana-Kimi: For You in Full Blossom",
-    "native": "花ざかりの君たちへ 第2期",
+    "titles": "Hana-Kimi, Hana-Kimi: For You in Full Blossom 花ざかりの君たちへ 第2期 Hanazakari no Kimitachi e 2nd Season; Hana-Kimi Season 2, Hanazakari no Kimitachi e 2nd Season, HanaKimi, The Thirsty Moon, The Cage of Summer, Natsu no Ori, Kawaki no Tsuki, 花ざかりの君たちへ 第2期, Hana-",
+    "native": "Hanazakari no Kimitachi e 2nd Season",
     "slug": "hana-kimi-season-2",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/0a790de7c5f2343e1dfab937db955c79.jpg",
-    "is_sub": 2,
+    "is_sub": 4,
     "description": "The second season of Hanazakari no Kimitachi e.",
-    "aired": "2026-07-02",
-    "season": "summer",
+    "aired": "Jul 2, 2026 to Nov 30, 1899",
+    "season": "&nbsp",
     "year": 2026,
     "duration": "",
     "status": "Currently Airing",
     "mal_id": "63780",
-    "episodes": "",
+    "episodes": "13",
     "ani_id": "209669",
     "source": "manga",
     "s_id": 524306,
     "background_image": "",
-    "updated_at": "2026-07-01 19:22:34",
-    "next_air_schedule_time": 1783524600,
-    "next_air_ep": 2,
+    "updated_at": "2026-07-15 16:50:01",
+    "next_air_schedule_time": 1784736000,
+    "next_air_ep": 5,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3281,18 +3625,20 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "is_dub": 2,
+    "score": "7.08"
   },
   {
     "id": 8763,
     "title": "Candy Caries",
     "alternative": "Candy Caries",
-    "titles": "キャンディーカリエス Candy Caries; Candy Caries, Candy Caries, キャンディーカリエス",
+    "titles": "キャンディーカリエス Candy Caries; Candy Caries",
     "native": "Candy Caries",
     "slug": "candy-caries-vm1jn",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/92c2425736b1065fa04616737b9e41b5.webp",
-    "is_sub": 12,
+    "is_sub": 14,
     "description": "Ame is a child who loves sweets. But inside her mouth lived a cavity named Caries! Caries calls Ame \"Mama\" and acts completely unrestrained, using her teeth as furniture and even taking over her body. Ame is constantly being bossed around by Caries.  Ame and Caries—a slightly unusual mother-daughter duo!? A slapstick comedy about their chaotic daily lives!",
     "aired": "Apr 16, 2026 to ?",
     "season": "Spring",
@@ -3306,9 +3652,9 @@
     "source": "original",
     "s_id": 20761,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/205772-fJwBre4r2a53.jpg",
-    "updated_at": "2026-07-01 16:40:02",
-    "next_air_schedule_time": 1783522560,
-    "next_air_ep": 13,
+    "updated_at": "2026-07-15 18:50:02",
+    "next_air_schedule_time": 1784732160,
+    "next_air_ep": 15,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3334,7 +3680,7 @@
     "slug": "heroine-saint-no-i-m-an-all-works-maid-and-proud-of-it",
     "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/096b87fd752da9a585e282e6556c22e7.jpg",
-    "is_sub": 2,
+    "is_sub": 4,
     "description": "“I will become the world’s most wonderful maid!” \nWith her skirt fluttering in black and white, the girl shouted. Her name is Melody. A reincarnated former Japanese girl, she now pursues her dream in her new life, working as an all-purpose maid for a poor count’s family in the kingdom of Théolas. When she makes it, even cheap tea turns into a luxury brew, and a dilapidated mansion is quickly restored to new! Cleaning, serving, hunting, DIY—leave it all to her and her powerful magic. Unbeknownst to Melody, this world is actually an otome game, and she is the most powerful and invincible heroine, the saint! Yet, she remains oblivious to this fact. Romance with handsome men? Attacks by the Demon Lord? Work comes first! A fantasy of misunderstood work that unknowingly shatters destiny!\n\n(Source: Seven Seas Entertainment)\n\nNote: Heroine? Seijo? Iie, All Works Maid desu (Ko)! is streaming a week in advance of the TV broadcast on dAnimeStore and ABEMA beginning June 24th, 2026. Regular broadcasting begins on July 1st, 2026.",
     "aired": "Jun 24, 2026 to Nov 30, 1899",
     "season": "&nbsp",
@@ -3342,14 +3688,14 @@
     "status": "Currently Airing",
     "score": "7.09",
     "mal_id": "61686",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "192800",
     "source": " Light novel",
     "s_id": 950722,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/192800-1EhTN0zOxQsW.jpg",
-    "updated_at": "2026-07-01 15:40:03",
-    "next_air_schedule_time": 1783517400,
-    "next_air_ep": 3,
+    "updated_at": "2026-07-15 15:00:01",
+    "next_air_schedule_time": 1784727000,
+    "next_air_ep": 5,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3367,12 +3713,12 @@
     "id": 8237,
     "title": "Ugoku! Neko Mukashibanashi",
     "alternative": "Ugoku! Neko Mukashibanashi",
-    "titles": "うごく！ねこむかしばなし Ugoku! Neko Mukashibanashi; Ugoku! Neko Mukashibanashi, Ugoku! Neko Mukashibanashi, うごく！ねこむかしばなし, Cat Tales",
+    "titles": "うごく！ねこむかしばなし Ugoku! Neko Mukashibanashi; Ugoku! Neko Mukashibanashi",
     "native": "Ugoku! Neko Mukashibanashi",
     "slug": "ugoku-neko-mukashibanashi-axqrf",
     "rating": "G",
     "poster": "https://cdn.anipixcdn.co/thumbnail/898b5da2c62fa1cc9fc1e5c8f204f41f.jpg",
-    "is_sub": 38,
+    "is_sub": 40,
     "description": "The cute comedy manga and anime take children's stories and folktales from all around the world and asks, \"what if a cat appeared in this story?\"",
     "aired": "Oct 15, 2025 to ?",
     "season": "&nbsp",
@@ -3385,9 +3731,9 @@
     "ani_id": "188529",
     "s_id": 19872,
     "background_image": "",
-    "updated_at": "2026-07-01 11:40:02",
-    "next_air_schedule_time": 1783508400,
-    "next_air_ep": 39,
+    "updated_at": "2026-07-15 11:50:01",
+    "next_air_schedule_time": 1784718000,
+    "next_air_ep": 41,
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -3409,12 +3755,12 @@
     "id": 8888,
     "title": "Versatile Mage Season 7",
     "alternative": "Quanzhi Fashi 7",
-    "titles": "Full-Time Magister 7th Season, Versatile Mage 7th Season, Almighty Mage 7th Season 全职法师 第7季 Quanzhi Fashi 7; Versatile Mage Season 7, Quanzhi Fashi VII, Quanzhi Fashi 7th Season, 全职法师 第7季, Almighty Mage 7th Season, 全职法师Ⅶ, Versatile Mage Season 7",
+    "titles": "Full-Time Magister 7th Season,Versatile Mage 7th Season,Almighty Mage 7th Season 全职法师 第7季 Quanzhi Fashi 7; Versatile Mage Season 7",
     "native": "Quanzhi Fashi 7",
     "slug": "versatile-mage-season-7",
     "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/0bd261e69bd10b1ec1e3b863767cdef8.jpg",
-    "is_sub": 7,
+    "is_sub": 9,
     "description": "The seventh season of Quanzhi Fashi.",
     "aired": "May 13, 2026 to Nov 30, 1899",
     "season": "&nbsp",
@@ -3426,7 +3772,7 @@
     "source": "other",
     "s_id": 582309,
     "background_image": "",
-    "updated_at": "2026-07-01 03:36:16",
+    "updated_at": "2026-07-15 03:50:07",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -3447,9 +3793,9 @@
     "titles": "Dadao Duxing: Die Long Bian; Da Dao Du Xing: Die Long Bian, Dadao Duxing: Die Long Bian, 大道独行之蝶龙变, Walking the Way All Alone",
     "native": "Da Dao Du Xing: Die Long Bian",
     "slug": "walking-the-way-all-alone-7lopv",
-    "rating": "PG 13",
+    "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/770bb6554eb438d0a3be3a67a47c1acd.jpg",
-    "is_sub": 14,
+    "is_sub": 16,
     "description": "Luo Li has been trapped in the soulless Yinzhou Continent since he was a child and became the number one killer of Tianjue Killing Hall. His father, Master Ciyun, sacrificed himself to buy Luo Li a chance to escape from Yinzhou and go to Zhongtian Main World to find the true way to cultivate immortality.",
     "aired": "Apr 6, 2026 to ?",
     "season": "Spring",
@@ -3462,7 +3808,7 @@
     "ani_id": "156090",
     "source": "web novel",
     "s_id": 20812,
-    "updated_at": "2026-07-01 03:35:02",
+    "updated_at": "2026-07-15 03:50:02",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -3480,7 +3826,9 @@
       "type": [
         "ONA"
       ]
-    }
+    },
+    "is_dub": 1,
+    "background_image": ""
   },
   {
     "id": 8768,
@@ -4279,9 +4627,9 @@
     "titles": "よわよわ先生 Yowayowa Sensei; Yowayowa Teacher, Yowayowa Sensei, Yowayowa Teacher, よわよわ先生",
     "native": "Yowayowa Sensei",
     "slug": "yowayowa-teacher-pwklu",
-    "rating": "",
+    "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/ee9aecd92c396ac1108ad72106a74dc2.jpg",
-    "is_dub": 2,
+    "is_dub": 4,
     "is_sub": 12,
     "description": "When the new term starts, second-year student Abikura discovers that his homeroom teacher is none other than Hiyori Hiwamura, infamously known as \"Scary-Scary Sensei,\" a woman rumored to curse anyone who crosses her.  But one day, Abikura accidentally witnesses a completely unexpected side of his fearsome teacher after school. The striking contrast between her fearsome image and her hidden personality is utterly irresistible!  Brace yourself for Gap Moe overload in this tender romantic comedy that's sure to ignite your protective instincts!",
     "aired": "Apr 11, 2026 to ?",
@@ -4296,7 +4644,7 @@
     "source": "manga",
     "s_id": 20653,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/185211-2wkjFD6tz7l3.jpg",
-    "updated_at": "2026-06-27 13:25:01",
+    "updated_at": "2026-07-15 22:17:44",
     "next_air_schedule_time": 1782563400,
     "next_air_ep": 12,
     "terms_by_type": {
@@ -5126,7 +5474,7 @@
     "slug": "the-most-heretical-last-boss-queen-from-villainess-to-savior-season-2-stnt7",
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/7752af3ead702112b1485be7e6a4c214.jpg",
-    "is_dub": 7,
+    "is_dub": 9,
     "is_sub": 12,
     "description": "Second season of . It’s one thing to get reincarnated as a righteous hero. It’s another thing entirely to get reincarnated as a villain! Our protagonist was just reincarnated into the body of Princess Pride Royal Ivy, the last boss and ultimate villain of her favorite otome game. But evil just isn’t her style, so she’ll use Pride’s powerful abilities to sow peace and love instead of discord! Can she change the fate of this vile villainess, or is her role in the story already rotten to the core?",
     "aired": "Apr 7, 2026 to ?",
@@ -5140,7 +5488,7 @@
     "ani_id": "195268",
     "s_id": 20635,
     "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195268-dsEz7gM76ykF.jpg",
-    "updated_at": "2026-06-23 14:50:05",
+    "updated_at": "2026-07-15 17:38:59",
     "next_air_schedule_time": 1782219600,
     "next_air_ep": 12,
     "terms_by_type": {
@@ -5638,12 +5986,12 @@
     "id": 8885,
     "title": "Biaoren 2",
     "alternative": "Biaoren 2",
-    "titles": "Blades of the Guardians 2, ヒョウ人-BLADES OF THE GUARDIANS 2, 鏢人2 镖人 第二季 Biaoren 2; Biaoren 2, Biao Ren Er, 镖人 第二季, Biao Ren 2nd Season, Blades of the Guardians 2nd Season, 镖人 贰",
+    "titles": "Blades of the Guardians 2,ヒョウ人-BLADES OF THE GUARDIANS 2,鏢人2 镖人 第二季 Biaoren 2; Biaoren 2",
     "native": "Biaoren 2",
     "slug": "biaoren-2",
-    "rating": "",
+    "rating": "N/A",
     "poster": "https://cdn.anipixcdn.co/thumbnail/98d4d889b04ffa45962771036a640f2f.jpg",
-    "is_sub": 3,
+    "is_sub": 7,
     "description": "The second season of Biaoren.",
     "aired": "Jun 11, 2026 to Nov 30, 1899",
     "season": "&nbsp",
@@ -5655,7 +6003,7 @@
     "source": "manga",
     "s_id": 236822,
     "background_image": "",
-    "updated_at": "2026-06-19 20:55:09",
+    "updated_at": "2026-07-16 13:55:07",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -6527,34 +6875,36 @@
     }
   },
   {
-    "id": 8851,
+    "id": 8950,
     "title": "Smoking Behind the Supermarket with You",
     "alternative": "Super no Ura de Yani Suu Futari",
-    "titles": "Smoking Behind the Supermarket with You, Super no Ura de Yani Suu Hanashi, A Story About Smoking at the Back of the Supermarket, YaniSuu, ヤニすう, YaniSuu",
+    "titles": "Behind the Supermarket, Smoking with You., Super no Ura de Yani Suu Hanashi, A Story About Smoking at the Back of the Supermarket, YaniSuu",
     "native": "スーパーの裏でヤニ吸うふたり",
-    "slug": "smoking-behind-the-supermarket-with-you",
-    "rating": "PG-13",
-    "poster": "https://cdn.anipixcdn.co/thumbnail/bd987a61591a601ca79f1b94d05109a4.jpg",
-    "is_sub": 12,
-    "description": "At age forty-five, office worker Sasaki has had enough of the corporate grind. His only solace is smoking-and the friendly smile of supermarket cashier Yamada. When Sasaki can't find Yamada after a particularly trying day, a striking woman invites him to smoke with her. The despondent man thinks he's made a new smoking buddy in the cool, teasing Tayama, but Sasaki doesn't realize he already knows her!(Source: Square Enix)",
+    "slug": "smoking-behind-the-supermarket-with-you-e086a",
+    "rating": "PG",
+    "poster": "https://cdn.anipixcdn.co/thumbnail/c7ebc8c532859f253cb1a84dcaebf35f.jpg",
+    "is_sub": 2,
+    "description": "The sole thing that gets the middle-aged Sasaki through his soul-sucking job is a cheerful smile from Yamada—the young woman who works at a nearby 24-hour supermarket he frequents. After every tiring day of getting berated by his boss, Sasaki stops by the store to have his spirit healed by his favorite cashier.After a particularly grueling day, Sasaki shows up at the supermarket, only to find that Yamada's shift has already ended. Disappointed, he searches for a place to smoke when a woman from behind the store calls him over to join her. The bold and dangerously playful Tayama is quick to call out Sasaki's peculiar habit of always seeking out her coworker—even going as far as telling Yamada about Sasaki's vested interest in her.Now, in addition to seeing his adored cashier Yamada, Sasaki also visits the store to see if his new smoking partner Tayama is around. But there is more to Tayama's mischievousness than she initially lets on. With every cigarette, an unlikely friendship begins to blossom.[Written by MAL Rewrite]",
     "aired": "Jun 3, 2026 to ?",
     "season": "summer",
     "year": 2026,
     "duration": "",
-    "status": "Finished Airing",
-    "score": "8.51",
+    "status": "Currently Airing",
+    "score": "8.48",
     "mal_id": "62076",
     "episodes": "12",
     "ani_id": "196187",
     "source": "manga",
-    "s_id": 627882,
-    "background_image": "https://cdn.anipixcdn.co/background/72e1c6c2fc21fcd3_1780874256.webp",
-    "updated_at": "2026-06-08 19:49:03",
+    "s_id": 564294,
+    "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/196187-Z9dV6uotmKjM.jpg",
+    "updated_at": "2026-07-16 18:03:17",
     "terms_by_type": {
       "genre": [
-        "Comedy",
-        "Romance",
-        "Slice of Life"
+        "Romance"
+      ],
+      "producers": [
+        "Bit grooove promotion",
+        "Nichion"
       ],
       "studios": [
         "Asahi Production"
@@ -6562,7 +6912,10 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "is_dub": 2,
+    "next_air_schedule_time": 1784818560,
+    "next_air_ep": 3
   },
   {
     "id": 8662,
@@ -7540,23 +7893,23 @@
     "slug": "from-old-country-bumpkin-to-master-swordsman-season-2",
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/e902c1200a3e95db62ad0b8c1e39fce9.jpg",
-    "is_dub": 0,
-    "is_sub": 0,
+    "is_dub": 2,
+    "is_sub": 2,
     "description": "The second season of Katainaka no Ossan, Kensei ni Naru.",
     "aired": "2026-07-08",
     "season": "summer",
     "year": 2026,
     "duration": "",
-    "status": "Not yet aired",
+    "status": "Currently Airing",
     "mal_id": "61897",
     "episodes": "",
     "ani_id": "194829",
     "source": "light_novel",
     "s_id": 961614,
-    "background_image": "",
-    "updated_at": "2026-05-21 17:36:47",
-    "next_air_schedule_time": 1783521900,
-    "next_air_ep": 1,
+    "background_image": "https://cdn.anipixcdn.co/background/a408ab8db370263b_1783551057.webp",
+    "updated_at": "2026-07-15 15:38:17",
+    "next_air_schedule_time": 1784731560,
+    "next_air_ep": 3,
     "terms_by_type": {
       "genre": [
         "Action",
@@ -7571,7 +7924,8 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "7.39"
   },
   {
     "id": 8867,
@@ -7814,7 +8168,7 @@
   },
   {
     "id": 8860,
-    "title": "Otomege Sekai wa Mob ni Kibishii Sekai desu 2",
+    "title": "Trapped in a Dating Sim: The World of Otome Games Is Tough for Mobs Season 2",
     "alternative": "Otomege Sekai wa Mob ni Kibishii Sekai desu 2",
     "titles": "Trapped in a Dating Sim: The World of Otome Games Is Tough for Mobs Season 2, mobseka 2, ชีวิตตัวประกอบอย่างตูช่างอยู่ยาก เมื่ออยู่ในโลกเกมจีบหนุ่ม ภาค 2, Otome Game Sekai wa Mob ni Kibishii Sekai desu 2, Otomege 2",
     "native": "乙女ゲー世界はモブに厳しい世界です2",
@@ -7822,20 +8176,20 @@
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/6eda7660a7340e448c9dbac95fcb175c.jpg",
     "is_dub": 0,
-    "is_sub": 0,
+    "is_sub": 2,
     "description": "The second season of Otomege Sekai wa Mob ni Kibishii Sekai desu.",
     "aired": "2026-07",
     "season": "summer",
     "year": 2026,
     "duration": "",
-    "status": "Not yet aired",
+    "status": "Currently Airing",
     "mal_id": "54000",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "159309",
     "source": "light_novel",
     "s_id": 935980,
-    "background_image": "",
-    "updated_at": "2026-05-21 17:36:21",
+    "background_image": "https://cdn.anipixcdn.co/background/6c3205d4ceff20c8_1783551060.webp",
+    "updated_at": "2026-07-15 15:42:56",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -7849,7 +8203,10 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "next_air_schedule_time": 1784730600,
+    "next_air_ep": 3,
+    "score": "6.81"
   },
   {
     "id": 8859,
@@ -8862,7 +9219,7 @@
   },
   {
     "id": 8801,
-    "title": "Youjo Senki II",
+    "title": "Saga of Tanya the Evil Season 2",
     "alternative": "Youjo Senki II",
     "titles": "Saga of Tanya the Evil Season 2, Saga of Tanya the Evil II, Youjo Senki 2",
     "native": "幼女戦記Ⅱ",
@@ -8870,20 +9227,20 @@
     "rating": "",
     "poster": "https://cdn.anipixcdn.co/thumbnail/fe0bb859201689576a3537d22e26f37e.jpg",
     "is_dub": 0,
-    "is_sub": 0,
+    "is_sub": 2,
     "description": "The second season of Youjo Senki.",
     "aired": "2026-07",
     "season": "summer",
     "year": 2026,
     "duration": "",
-    "status": "Not yet aired",
+    "status": "Currently Airing",
     "mal_id": "49233",
-    "episodes": "",
+    "episodes": "12",
     "ani_id": "135865",
     "source": "light_novel",
     "s_id": 2147483640,
     "background_image": "",
-    "updated_at": "2026-05-19 20:50:57",
+    "updated_at": "2026-07-15 14:03:55",
     "terms_by_type": {
       "genre": [
         "Action",
@@ -8895,7 +9252,10 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "score": "7.16",
+    "next_air_schedule_time": 1784723400,
+    "next_air_ep": 3
   },
   {
     "id": 8799,
@@ -108583,7 +108943,7 @@
     "rating": "PG-13",
     "poster": "https://cdn.anipixcdn.co/thumbnail/e743a091199384909e62fdb62d701810.jpeg",
     "is_sub": 12,
-    "description": "Mahiru Shiina is worthy of her nickname \"Angel\": she is a divine beauty loved by all, and she excels in both academics and athletics. Shiina lives in an entirely different world from Amane Fujimiya, her next-door neighbor. Despite living so close together, they have never spoken once. But their silence is broken when Fujimiya spots Shiina gloomily sitting on a swing amidst a heavy rainstorm and lends her his umbrella.\r\n\r\nWhen Fujimiya catches a cold the next day, Shiina wishes to return the favor for the umbrella by nursing him back to health. Believing that this would be their first and last interaction, he silently appreciates her kindness. However, Shiina—who can not help but worry about Fujimiya's lack of tidiness and proper nutrition—begins to cook and clean for him. As the unlikely pair spend time together in Fujimiya's apartment, they explore the true nature of their relationship and the gentle emotions that emerge from it.",
+    "description": "Mahiru Shiina is worthy of her nickname \"Angel\": she is a divine beauty loved by all, and she excels in both academics and athletics. Shiina lives in an entirely different world from Amane Fujimiya, her next-door neighbor. Despite living so close together, they have never spoken once. But their silence is broken when Fujimiya spots Shiina gloomily sitting on a swing amidst a heavy rainstorm and lends her his umbrella.When Fujimiya catches a cold the next day, Shiina wishes to return the favor for the umbrella by nursing him back to health. Believing that this would be their first and last interaction, he silently appreciates her kindness. However, Shiina—who can not help but worry about Fujimiya's lack of tidiness and proper nutrition—begins to cook and clean for him. As the unlikely pair spend time together in Fujimiya's apartment, they explore the true nature of their relationship and the gentle emotions that emerge from it.",
     "aired": "Jan 7, 2023 to Mar 25, 2023",
     "season": "Winter",
     "year": 2023,
@@ -108594,7 +108954,7 @@
     "episodes": "12",
     "ani_id": "143338",
     "s_id": 18249,
-    "updated_at": "2024-10-18 09:40:24",
+    "updated_at": "2026-07-17 11:21:27",
     "terms_by_type": {
       "genre": [
         "Comedy",
@@ -108610,7 +108970,10 @@
       "type": [
         "TV"
       ]
-    }
+    },
+    "is_dub": 12,
+    "source": "",
+    "background_image": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/143338-d0AqJzRUQCgk.jpg"
   },
   {
     "id": 6578,

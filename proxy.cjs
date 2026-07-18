@@ -69,6 +69,266 @@ async function syncDB() {
 
 setInterval(syncDB, 10 * 60 * 1000);
 
+// ─── Local AniList Database (anilist_db.json) ─────────────────────────────────
+let anilistDb = {};
+const ANILIST_DB_PATH = pathLib.join(__dirname, 'anilist_db.json');
+
+function loadAnilistDb() {
+  try {
+    if (fs.existsSync(ANILIST_DB_PATH)) {
+      const data = fs.readFileSync(ANILIST_DB_PATH, 'utf8');
+      anilistDb = JSON.parse(data);
+      console.log(`[AniList DB] Loaded ${Object.keys(anilistDb).length} enriched entries from anilist_db.json`);
+    } else {
+      console.warn(`[AniList DB] anilist_db.json not found, starting fresh.`);
+    }
+  } catch (err) {
+    console.error(`[AniList DB] Failed to load AniList DB:`, err.message);
+  }
+}
+
+let _anilistSaveTimer = null;
+function saveAnilistDb(immediate = false) {
+  if (immediate) {
+    if (_anilistSaveTimer) {
+      clearTimeout(_anilistSaveTimer);
+      _anilistSaveTimer = null;
+    }
+    try {
+      fs.writeFileSync(ANILIST_DB_PATH, JSON.stringify(anilistDb, null, 2), 'utf8');
+      console.log(`[AniList DB] Saved to disk.`);
+    } catch (err) {
+      console.error(`[AniList DB] Failed to save DB:`, err.message);
+    }
+    return;
+  }
+  if (_anilistSaveTimer) return;
+  _anilistSaveTimer = setTimeout(() => {
+    _anilistSaveTimer = null;
+    try {
+      fs.writeFileSync(ANILIST_DB_PATH, JSON.stringify(anilistDb, null, 2), 'utf8');
+      console.log(`[AniList DB] Saved to disk (debounced).`);
+    } catch (err) {
+      console.error(`[AniList DB] Failed to save DB:`, err.message);
+    }
+  }, 30000);
+}
+
+const ANILIST_DETAILS_QUERY = `
+query ($id: Int) {
+  Media(id: $id) {
+    relations {
+      edges {
+        relationType
+        node { id title { romaji english } format coverImage { large medium } }
+      }
+    }
+    characters(sort: [ROLE, RELEVANCE], perPage: 16) {
+      edges {
+        role
+        node { id name { full } image { large medium } }
+        voiceActors(language: JAPANESE) { name { full } image { large medium } }
+      }
+    }
+    staff(perPage: 12) {
+      edges {
+        role
+        node { id name { full } image { large medium } }
+      }
+    }
+    recommendations(perPage: 16, sort: RATING_DESC) {
+      nodes {
+        mediaRecommendation {
+          id title { romaji english } format averageScore coverImage { large medium }
+        }
+      }
+    }
+  }
+}`;
+
+function anilistPost(query, variables) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({ query, variables });
+    const MARKER = '\n__META__:';
+    const args = [
+      '-s', '--max-time', '15',
+      '-X', 'POST',
+      '-H', 'Content-Type: application/json',
+      '-H', 'Accept: application/json',
+      '-d', body,
+      '-w', `${MARKER}%{http_code}:%{header_json}`,
+      'https://graphql.anilist.co'
+    ];
+    const curl = spawn('curl', args);
+    const chunks = [];
+    curl.stdout.on('data', c => chunks.push(c));
+    curl.stdout.on('end', () => {
+      const full = Buffer.concat(chunks).toString('utf8');
+      const idx = full.lastIndexOf(MARKER);
+      let bodyStr = full, status = 0, retryAfter = null;
+      if (idx !== -1) {
+        bodyStr = full.slice(0, idx);
+        const meta = full.slice(idx + MARKER.length);
+        const colon = meta.indexOf(':');
+        status = parseInt(colon === -1 ? meta : meta.slice(0, colon), 10) || 0;
+        try {
+          const headers = JSON.parse(meta.slice(colon + 1));
+          const ra = headers['retry-after'] || headers['Retry-After'];
+          if (ra) retryAfter = parseInt(Array.isArray(ra) ? ra[0] : ra, 10) || null;
+        } catch { /* ignored */ }
+      }
+      resolve({ body: Buffer.from(bodyStr, 'utf8'), status, retryAfter });
+    });
+    curl.stderr.on('data', () => {});
+    curl.on('error', reject);
+  });
+}
+
+async function fetchAndStoreAnilistData(anilistId) {
+  const key = String(anilistId);
+  if (!key || key === 'undefined' || key === 'null') return false;
+  try {
+    const { body, status, retryAfter } = await anilistPost(ANILIST_DETAILS_QUERY, { id: parseInt(key, 10) });
+    if (status === 429 || status === 503) {
+      const waitSec = retryAfter && retryAfter > 0 ? retryAfter : 60;
+      console.warn(`[AniList Sync] Rate limited (HTTP ${status}); waiting ${waitSec}s.`);
+      return { rateLimited: true, waitSec };
+    }
+    const json = JSON.parse(body.toString('utf8'));
+    if (Array.isArray(json?.errors) && json.errors.some(e => e.status === 429)) {
+      console.warn('[AniList Sync] GraphQL level rate limited; cooling down 60s.');
+      return { rateLimited: true, waitSec: 60 };
+    }
+    const media = json?.data?.Media;
+    if (!media) {
+      anilistDb[key] = {
+        relations: [],
+        characters: [],
+        staff: [],
+        recommendations: [],
+        fetched_at: Date.now()
+      };
+      saveAnilistDb();
+      return true;
+    }
+
+    const relations = (media.relations?.edges || []).map(edge => ({
+      id: edge.node.id,
+      relation_type: edge.relationType,
+      format: edge.node.format,
+      title: edge.node.title,
+      cover_image: {
+        large: edge.node.coverImage?.large || edge.node.coverImage?.medium || '',
+        medium: edge.node.coverImage?.medium || ''
+      }
+    }));
+
+    const characters = (media.characters?.edges || []).map(edge => ({
+      id: edge.node.id,
+      name: edge.node.name?.full || '',
+      role: edge.role ? edge.role.charAt(0) + edge.role.slice(1).toLowerCase() : '',
+      image: edge.node.image?.large || edge.node.image?.medium || '',
+      voice_actor: edge.voiceActors?.[0]?.name?.full || '',
+      voice_actor_image: edge.voiceActors?.[0]?.image?.large || edge.voiceActors?.[0]?.image?.medium || ''
+    }));
+
+    const staff = (media.staff?.edges || []).map(edge => ({
+      id: edge.node.id,
+      name: edge.node.name?.full || '',
+      role: edge.role || '',
+      image: edge.node.image?.large || edge.node.image?.medium || ''
+    }));
+
+    const recommendations = (media.recommendations?.nodes || [])
+      .map(n => n.mediaRecommendation)
+      .filter(Boolean)
+      .map(rec => ({
+        id: rec.id,
+        title: rec.title,
+        format: rec.format,
+        type: rec.format,
+        average_score: rec.averageScore || null,
+        cover_image: {
+          large: rec.coverImage?.large || rec.coverImage?.medium || '',
+          medium: rec.coverImage?.medium || ''
+        }
+      }));
+
+    anilistDb[key] = {
+      relations,
+      characters,
+      staff,
+      recommendations,
+      fetched_at: Date.now()
+    };
+    saveAnilistDb();
+    return true;
+  } catch (err) {
+    console.error(`[AniList Sync] Enrichment failed for ${anilistId}:`, err.message);
+    return false;
+  }
+}
+
+let _isSyncingAnilist = false;
+async function syncAnilistDb() {
+  if (_isSyncingAnilist) return;
+  _isSyncingAnilist = true;
+  console.log('[AniList Sync] Starting database check...');
+  try {
+    const aniIds = Array.from(new Set(
+      db.map(x => x.ani_id || x.id)
+        .filter(id => id && String(id) !== 'undefined' && String(id) !== 'null')
+        .map(String)
+    ));
+
+    console.log(`[AniList Sync] Found ${aniIds.length} unique anime IDs to check.`);
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    const queue = aniIds.filter(id => {
+      const entry = anilistDb[id];
+      return !entry || (now - (entry.fetched_at || 0) > sevenDaysMs);
+    });
+
+    if (queue.length === 0) {
+      console.log('[AniList Sync] Database is up to date. Zero items queued.');
+      _isSyncingAnilist = false;
+      return;
+    }
+
+    console.log(`[AniList Sync] Queued ${queue.length} items for enrichment.`);
+    
+    let processed = 0;
+    for (const id of queue) {
+      const result = await fetchAndStoreAnilistData(id);
+      processed++;
+      
+      if (result && result.rateLimited) {
+        const waitTime = result.waitSec || 60;
+        console.log(`[AniList Sync] Pausing sync queue for ${waitTime} seconds due to rate limits...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+        continue;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (processed % 50 === 0) {
+        console.log(`[AniList Sync] Processed ${processed}/${queue.length} items...`);
+        saveAnilistDb(true);
+      }
+    }
+    
+    console.log('[AniList Sync] Sync finished.');
+    saveAnilistDb(true);
+  } catch (err) {
+    console.error('[AniList Sync Error]:', err.message);
+  } finally {
+    _isSyncingAnilist = false;
+  }
+}
+
+setInterval(syncAnilistDb, 30 * 60 * 1000);
+
 function getMediaById(id) {
   return db.find(m => String(m.ani_id) === String(id) || String(m.id) === String(id));
 }
@@ -610,6 +870,16 @@ const server = http.createServer(async (req, res) => {
 
       const mapped = mapAnikotoMedia(media);
 
+      // Enrich with local AniList data if available
+      const anilistId = media.ani_id || media.id;
+      const cachedDetails = anilistDb[String(anilistId)];
+      if (cachedDetails) {
+        mapped.relations = cachedDetails.relations || [];
+        mapped.characters = cachedDetails.characters || [];
+        mapped.staff = cachedDetails.staff || [];
+        mapped.recommendations = cachedDetails.recommendations || [];
+      }
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, data: mapped }));
     } catch (err) {
@@ -806,5 +1076,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Node-Animetsu-API CORS Proxy is listening on port ${PORT} at http://0.0.0.0:${PORT}`);
   loadDB();
-
+  loadAnilistDb();
+  syncDB();
+  syncAnilistDb();
 });

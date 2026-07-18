@@ -7,6 +7,7 @@ function AnimeRow({ title, subtitle, url, data, limit = 0, viewMoreLink = "/sear
     const [animeList, setAnimeList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [retryTrigger, setRetryTrigger] = useState(0);
 
     useEffect(() => {
         if (data) {
@@ -42,7 +43,7 @@ function AnimeRow({ title, subtitle, url, data, limit = 0, viewMoreLink = "/sear
         return () => {
             isMounted = false;
         };
-    }, [url, data]);
+    }, [url, data, retryTrigger]);
 
     if (loading) {
         return (
@@ -70,8 +71,27 @@ function AnimeRow({ title, subtitle, url, data, limit = 0, viewMoreLink = "/sear
         );
     }
 
-    if (error || animeList.length === 0) {
-        return null; // Gracefully hide rows that fail or are empty
+    if (error) {
+        return (
+            <div className="anime-row">
+                <div className="row-header-wrapper">
+                    <div className="row-header">
+                        <h2>{title}</h2>
+                    </div>
+                    {subtitle && <p className="row-subtitle">{subtitle}</p>}
+                </div>
+                <div className="row-error-message" style={{ padding: "30px 20px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", border: "1px dashed rgba(255,255,255,0.1)", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", margin: "10px 0" }}>
+                    <p style={{ margin: 0, color: "#aaa" }}>Failed to load list: {error}</p>
+                    <button onClick={() => setRetryTrigger(prev => prev + 1)} style={{ padding: "8px 20px", background: "var(--primary-red, #e50914)", border: "none", color: "#fff", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", transition: "background 0.2s" }} onMouseOver={(e) => e.target.style.background = "#b80710"} onMouseOut={(e) => e.target.style.background = "var(--primary-red, #e50914)"}>
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (animeList.length === 0) {
+        return null; // Gracefully hide rows that are empty
     }
 
     const displayList = limit > 0 ? animeList.slice(0, limit) : animeList;
